@@ -1,0 +1,138 @@
+/* =========================================================================
+   Bishal Hona — design tokens
+   Concept: composure. The page holds still until asked. The only chroma on
+   the whole site is Ember, and it appears only when a diagram shows a
+   failure. Calm has no color.
+   ========================================================================= */
+
+:root {
+  /* ---- palette (6 named values) ------------------------------------------ */
+  --paper:    #f1f2f3; /* cool off-white ground — deliberately not cream       */
+  --panel:    #e7e8ea; /* one step down — inset diagram surfaces               */
+  --ink:      #17181b; /* near-black — primary type, healthy/active elements   */
+  --graphite: #5b5f66; /* secondary text, mono labels, annotations             */
+  --mist:     #d6d8db; /* hairlines, borders, idle/stalled diagram state       */
+  --ember:    #a33a30; /* THE ONLY CHROMA. diagram failure/revoke beat only.   */
+
+  /* derived, still monochrome */
+  --ink-08:  color-mix(in srgb, var(--ink) 8%, transparent);
+  --ink-04:  color-mix(in srgb, var(--ink) 4%, transparent);
+  --ember-12: color-mix(in srgb, var(--ember) 12%, transparent);
+
+  /* ---- type ---------------------------------------------------------------
+     Two typefaces, each a voice:
+       serif (Newsreader)   = human judgment  — used big and rarely
+       mono/sans (Geist)    = the machine     — everything systemic          */
+  --font-serif: 'Newsreader Variable', 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-sans:  'Geist Variable', 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:  'Geist Mono Variable', 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* fluid type scale */
+  --step--1: clamp(0.78rem, 0.76rem + 0.10vw, 0.84rem);
+  --step-0:  clamp(0.98rem, 0.95rem + 0.15vw, 1.06rem);
+  --step-1:  clamp(1.20rem, 1.12rem + 0.40vw, 1.45rem);
+  --step-2:  clamp(1.55rem, 1.35rem + 1.00vw, 2.20rem);
+  --step-3:  clamp(2.10rem, 1.70rem + 2.00vw, 3.40rem);
+  --step-4:  clamp(2.80rem, 2.10rem + 3.60vw, 5.20rem);
+
+  /* ---- space / rhythm ---------------------------------------------------- */
+  --measure: 66ch;          /* reading measure                               */
+  --gutter: clamp(1.25rem, 0.9rem + 2.5vw, 3rem);
+  --shell:  min(1120px, 100% - 2 * var(--gutter));
+  --flow:   clamp(1rem, 0.9rem + 0.6vw, 1.4rem);
+
+  --dur-slow: 900ms;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  color-scheme: light;
+}
+
+/* =========================================================================
+   reset — minimal, opinionated
+   ========================================================================= */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  min-height: 100dvh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  line-height: 1.6;
+  font-weight: 400;
+  letter-spacing: -0.006em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img, svg, video { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; }
+
+/* =========================================================================
+   type roles
+   ========================================================================= */
+.serif { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.012em; }
+.mono  { font-family: var(--font-mono); }
+
+/* mono label — the machine voice. used for nav, kickers, metadata, states. */
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  font-weight: 500;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* =========================================================================
+   layout primitives
+   ========================================================================= */
+.shell { width: var(--shell); margin-inline: auto; }
+.measure { max-width: var(--measure); }
+.flow > * + * { margin-top: var(--flow); }
+
+.hr { height: 1px; background: var(--mist); border: 0; }
+
+/* =========================================================================
+   focus — visible, monochrome, never removed
+   ========================================================================= */
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+/* skip link */
+.skip {
+  position: absolute;
+  left: var(--gutter);
+  top: -4rem;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.6rem 1rem;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  z-index: 50;
+  transition: top 160ms var(--ease);
+}
+.skip:focus { top: 1rem; }
+
+::selection { background: var(--ink); color: var(--paper); }
+
+/* =========================================================================
+   motion policy — composure. nothing moves on its own; and if the visitor
+   asks for less, the diagrams resolve instantly to their meaningful frame.
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

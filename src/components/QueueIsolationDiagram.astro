@@ -1,0 +1,280 @@
+---
+import '../styles/diagram.css'
+// Diagram 1 — Two-queue job isolation with recovery.
+// Grounded in Nura's sessionAnalysisWorker: session-analysis and
+// insight-generation are separate BullMQ queues; a recovery-scheduler
+// re-enqueues jobs left stalled (pending / failed / stuck-processing).
+const id = 'd-queue'
+---
+
+<figure class="diagram" data-diagram={id}>
+  <figcaption class="diagram__head">
+    <span class="label diagram__kicker">Fig. 01 · Queue isolation &amp; recovery</span>
+    <span class="label">BullMQ · Redis</span>
+  </figcaption>
+
+  <div class="diagram__stage">
+    <svg
+      class="diagram__svg d-svg"
+      viewBox="0 0 680 380"
+      role="img"
+      aria-label="Animation: a job routes into two isolated queues. The session-analysis queue stalls while insight-generation keeps flowing. A recovery scheduler re-enqueues the stalled job, and both queues finish with no job lost."
+      data-phase="idle"
+    >
+      <!-- ingress -->
+      <g>
+        <rect class="d-node" x="24" y="152" width="112" height="44" rx="4"></rect>
+        <text class="d-label" x="80" y="171" text-anchor="middle">session</text>
+        <text class="d-sub"   x="80" y="185" text-anchor="middle">.closed</text>
+      </g>
+
+      <!-- router -->
+      <path class="d-track" d="M136 174 H196"></path>
+      <rect class="d-node d-router" x="196" y="158" width="32" height="32" rx="4"></rect>
+
+      <!-- connectors router -> lanes -->
+      <path class="d-track" d="M228 174 C 268 174, 268 96, 300 96"></path>
+      <path class="d-track" d="M228 174 C 268 174, 268 252, 300 252"></path>
+
+      <!-- LANE A : session-analysis (top) -->
+      <path class="d-track laneA" d="M300 96 H560"></path>
+      <g>
+        <rect class="d-node workerA" x="560" y="74" width="112" height="44" rx="4"></rect>
+        <text class="d-label" x="616" y="93" text-anchor="middle">analysis</text>
+        <text class="d-sub"   x="616" y="107" text-anchor="middle">worker</text>
+      </g>
+      <text class="d-sub laneA-name" x="300" y="70">session-analysis</text>
+      <g class="d-chip chipA" transform="translate(470,120)">
+        <rect x="0" y="0" width="86" height="20" rx="3"></rect>
+        <text x="43" y="14" text-anchor="middle">queued</text>
+      </g>
+
+      <!-- LANE B : insight-generation (bottom) -->
+      <path class="d-track laneB" d="M300 252 H560"></path>
+      <g>
+        <rect class="d-node workerB" x="560" y="230" width="112" height="44" rx="4"></rect>
+        <text class="d-label" x="616" y="249" text-anchor="middle">insight</text>
+        <text class="d-sub"   x="616" y="263" text-anchor="middle">worker</text>
+      </g>
+      <text class="d-sub laneB-name" x="300" y="290">insight-generation</text>
+      <g class="d-chip chipB" transform="translate(470,276)">
+        <rect x="0" y="0" width="86" height="20" rx="3"></rect>
+        <text x="43" y="14" text-anchor="middle">queued</text>
+      </g>
+
+      <!-- recovery scheduler -->
+      <path class="d-track recov-link" d="M356 330 V 300 C 356 220, 300 200, 300 116"></path>
+      <g class="recov">
+        <rect class="d-node recov-node" x="300" y="330" width="150" height="34" rx="4"></rect>
+        <text class="d-label recov-text" x="375" y="351" text-anchor="middle">recovery-scheduler</text>
+      </g>
+
+      <!-- sweep line (scans lane A during recovery) -->
+      <line class="sweep-line" x1="0" y1="80" x2="0" y2="112" transform="translate(300,0)"></line>
+
+      <!-- packets -->
+      <g class="d-pkt pkt-in">
+        <rect x="-17" y="-9" width="34" height="18"></rect>
+        <text x="0" y="3.5" text-anchor="middle">job</text>
+      </g>
+      <g class="d-pkt pkt-a">
+        <rect x="-17" y="-9" width="34" height="18"></rect>
+        <text x="0" y="3.5" text-anchor="middle">a·1</text>
+      </g>
+      <g class="d-pkt pkt-b">
+        <rect x="-17" y="-9" width="34" height="18"></rect>
+        <text x="0" y="3.5" text-anchor="middle">b·1</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="diagram__bar">
+    <span class="diagram__status">
+      <span class="diagram__dot"></span>
+      <span class="diagram__status-text">Idle. Press play to run a job through both queues.</span>
+    </span>
+    <button class="diagram__replay" type="button" data-replay>▷ Play</button>
+  </div>
+
+  <p class="diagram__caption">
+    There are two separate queues here. When the <b>session-analysis</b> worker
+    stalls, the <b>insight-generation</b> queue keeps draining right past it. The
+    failure doesn't cross over. A recovery pass comes back for the stuck job, so
+    nothing quietly disappears. For the user, it means one broken pipeline never
+    freezes the rest of the app.
+  </p>
+</figure>
+
+<style>
+  /* --- lane / node phase states ------------------------------------------ */
+  .d-router { fill: var(--paper); }
+
+  .laneA, .laneB { stroke: var(--mist); }
+  .workerA, .workerB { transition: stroke 300ms var(--ease), fill 300ms var(--ease); }
+
+  /* active flow inks the lanes + workers */
+  [data-phase='flow'] .laneA,
+  [data-phase='flow'] .laneB,
+  [data-phase='reflow'] .laneA,
+  [data-phase='done'] .laneA,
+  [data-phase='done'] .laneB { stroke: var(--ink); }
+
+  [data-phase='flow'] .workerA, [data-phase='flow'] .workerB,
+  [data-phase='reflow'] .workerA,
+  [data-phase='done'] .workerA, [data-phase='done'] .workerB { stroke: var(--ink); }
+
+  /* lane B stays inked once it has run — isolation: unaffected by A */
+  [data-phase='stall'] .laneB,
+  [data-phase='sweep'] .laneB,
+  [data-phase='recover'] .laneB { stroke: var(--ink); }
+  [data-phase='stall'] .workerB,
+  [data-phase='sweep'] .workerB,
+  [data-phase='recover'] .workerB { stroke: var(--ink); }
+
+  /* THE failure beat — lane A goes to Ember (the only color on the site) */
+  [data-phase='stall'] .laneA,
+  [data-phase='sweep'] .laneA {
+    stroke: var(--ember);
+    stroke-dasharray: 5 5;
+  }
+  [data-phase='stall'] .workerA,
+  [data-phase='sweep'] .workerA { stroke: var(--ember); }
+  [data-phase='stall'] .pkt-a rect,
+  [data-phase='sweep'] .pkt-a rect { fill: var(--ember); }
+
+  /* recovery node wakes during the sweep */
+  .recov-node, .recov-link { opacity: 0.35; transition: opacity 300ms var(--ease), stroke 300ms var(--ease); }
+  .recov-text { opacity: 0.5; transition: opacity 300ms var(--ease); }
+  [data-phase='sweep'] .recov-node,
+  [data-phase='recover'] .recov-node { opacity: 1; stroke: var(--ink); }
+  [data-phase='sweep'] .recov-link,
+  [data-phase='recover'] .recov-link { opacity: 1; stroke: var(--ink); }
+  [data-phase='sweep'] .recov-text,
+  [data-phase='recover'] .recov-text { opacity: 1; }
+
+  /* sweep line */
+  .sweep-line { stroke: var(--ember); stroke-width: 2; opacity: 0; }
+  [data-phase='sweep'] .sweep-line {
+    opacity: 0.9;
+    animation: d-sweep 1.4s var(--ease) both;
+  }
+  @keyframes d-sweep {
+    0%   { transform: translate(560px, 0); }
+    100% { transform: translate(300px, 0); }
+  }
+
+  /* --- packet positions per phase --------------------------------------- */
+  .pkt-in { transform: translate(80px, 174px); opacity: 0; }
+  [data-phase='dispatch'] .pkt-in { transform: translate(212px, 174px); opacity: 1; }
+
+  .pkt-a { transform: translate(300px, 96px); opacity: 0; }
+  .pkt-b { transform: translate(300px, 252px); opacity: 0; }
+
+  [data-phase='split'] .pkt-a,
+  [data-phase='split'] .pkt-b { opacity: 1; }
+
+  [data-phase='flow'] .pkt-a { transform: translate(516px, 96px); opacity: 1; }
+  [data-phase='flow'] .pkt-b { transform: translate(516px, 252px); opacity: 1; }
+
+  /* A stalls partway; B has arrived and stays */
+  [data-phase='stall'] .pkt-a { transform: translate(430px, 96px); opacity: 1; }
+  [data-phase='stall'] .pkt-b,
+  [data-phase='sweep'] .pkt-b,
+  [data-phase='recover'] .pkt-b,
+  [data-phase='reflow'] .pkt-b,
+  [data-phase='done'] .pkt-b { transform: translate(516px, 252px); opacity: 1; }
+
+  [data-phase='sweep'] .pkt-a { transform: translate(430px, 96px); opacity: 1; }
+  /* re-enqueued: A returns to the head of its lane */
+  [data-phase='recover'] .pkt-a { transform: translate(300px, 96px); opacity: 1; }
+  [data-phase='reflow'] .pkt-a { transform: translate(516px, 96px); opacity: 1; }
+  [data-phase='done'] .pkt-a  { transform: translate(516px, 96px); opacity: 1; }
+
+  /* chips */
+  [data-diagram] .chipA text, [data-diagram] .chipB text { transition: fill 200ms var(--ease); }
+</style>
+
+<script>
+  type Step = { p: string; text: string; live: 0 | 1; alert?: boolean; dur: number }
+  const timeline: Step[] = [
+    { p: 'dispatch', text: 'session.closed → job accepted', live: 1, dur: 1150 },
+    { p: 'split',    text: 'routing into two separate queues', live: 1, dur: 1050 },
+    { p: 'flow',     text: 'session-analysis and insight-generation, both processing', live: 1, dur: 1600 },
+    { p: 'stall',    text: 'session-analysis worker STALLED. insight-generation still fine', live: 1, alert: true, dur: 2000 },
+    { p: 'sweep',    text: 'recovery-scheduler sweeping for stuck jobs', live: 1, alert: true, dur: 1500 },
+    { p: 'recover',  text: 'stuck job re-enqueued. attempt 2 of 3', live: 1, dur: 1400 },
+    { p: 'reflow',   text: 'session-analysis reprocessing', live: 1, dur: 1600 },
+    { p: 'done',     text: 'both queues drained. no job lost', live: 0, dur: 0 },
+  ]
+
+  const chipA: Record<string, string> = {
+    idle: 'queued', dispatch: 'queued', split: 'queued', flow: 'processing',
+    stall: 'stalled', sweep: 'orphaned', recover: 're-enqueued', reflow: 'processing', done: 'done',
+  }
+  const chipB: Record<string, string> = {
+    idle: 'queued', dispatch: 'queued', split: 'queued', flow: 'processing',
+    stall: 'done', sweep: 'done', recover: 'done', reflow: 'done', done: 'done',
+  }
+
+  function init(fig: HTMLElement) {
+    const svg = fig.querySelector<SVGSVGElement>('.d-svg')!
+    const statusText = fig.querySelector<HTMLElement>('.diagram__status-text')!
+    const status = fig.querySelector<HTMLElement>('.diagram__status')!
+    const btn = fig.querySelector<HTMLButtonElement>('[data-replay]')!
+    const chipAEl = fig.querySelector<SVGTextElement>('.chipA text')!
+    const chipBEl = fig.querySelector<SVGTextElement>('.chipB text')!
+    const timers: number[] = []
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+    const setPhase = (p: string) => {
+      svg.dataset.phase = p
+      status.dataset.live = '1'
+      chipAEl.textContent = chipA[p] ?? ''
+      chipBEl.textContent = chipB[p] ?? ''
+      chipAEl.style.fill = p === 'stall' || p === 'sweep' ? 'var(--ember)' : 'var(--graphite)'
+    }
+
+    const clear = () => { timers.forEach(clearTimeout); timers.length = 0 }
+
+    const staticFrame = () => {
+      clear()
+      setPhase('done')
+      chipAEl.textContent = 'recovered'
+      statusText.textContent = 'Recovered. session-analysis stalled, got re-enqueued, and both queues drained. No job lost.'
+      status.classList.remove('diagram__status--alert')
+      status.dataset.live = '0'
+      btn.textContent = '▷ Play'
+    }
+
+    const run = () => {
+      if (reduce.matches) { staticFrame(); return }
+      clear()
+      btn.textContent = '↻ Replay'
+      let t = 0
+      timeline.forEach((s) => {
+        timers.push(window.setTimeout(() => {
+          setPhase(s.p)
+          statusText.textContent = s.text
+          status.dataset.live = String(s.live)
+          status.classList.toggle('diagram__status--alert', !!s.alert)
+        }, t))
+        t += s.dur
+      })
+    }
+
+    btn.addEventListener('click', run)
+    svg.addEventListener('click', run)
+    svg.style.cursor = 'pointer'
+
+    // On first view: run once when scrolled into view (unless reduced motion).
+    if (reduce.matches) { staticFrame(); return }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { run(); io.disconnect() }
+      })
+    }, { threshold: 0.5 })
+    io.observe(fig)
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-diagram="d-queue"]').forEach(init)
+</script>

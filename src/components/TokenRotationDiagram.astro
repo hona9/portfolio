@@ -1,0 +1,267 @@
+---
+import '../styles/diagram.css'
+// Diagram 2 — Refresh-token rotation with replay (reuse) detection.
+// Grounded in Nura's RefreshTokenUseCase: refresh tokens rotate on every use;
+// a token already marked `rotatedAt` presented again => reuse detected =>
+// revokeAllForUser('suspicious'). Access tokens are 15-min JWTs with an
+// O(1) Redis blacklist.
+const id = 'd-token'
+---
+
+<figure class="diagram" data-diagram={id}>
+  <figcaption class="diagram__head">
+    <span class="label diagram__kicker">Fig. 02 · Token rotation &amp; replay detection</span>
+    <span class="label">JWT · Redis blacklist</span>
+  </figcaption>
+
+  <div class="diagram__stage">
+    <svg
+      class="diagram__svg d-svg"
+      viewBox="0 0 680 400"
+      role="img"
+      aria-label="Animation: refresh tokens rotate normally on each use. A second device then replays an already-rotated token. The server detects the reuse and revokes every session at once."
+      data-phase="idle"
+    >
+      <!-- auth server -->
+      <rect class="d-node" x="270" y="22" width="140" height="40" rx="4"></rect>
+      <text class="d-label" x="340" y="47" text-anchor="middle">auth server</text>
+
+      <!-- server -> token issue links -->
+      <path class="link l1" d="M340 62 C 200 90, 120 110, 120 148"></path>
+      <path class="link l2" d="M340 62 C 320 100, 300 120, 300 148"></path>
+      <path class="link l3" d="M340 62 C 420 100, 480 120, 480 148"></path>
+
+      <!-- refresh-token chain -->
+      <g class="rt rt1" transform="translate(120,170)">
+        <rect class="rt-box" x="-46" y="0" width="92" height="40" rx="4"></rect>
+        <text class="rt-name" x="0" y="18" text-anchor="middle">RT · 1</text>
+        <text class="rt-sub"  x="0" y="32" text-anchor="middle">valid</text>
+        <line class="strike" x1="-46" y1="20" x2="46" y2="20"></line>
+      </g>
+      <g class="rt rt2" transform="translate(300,170)">
+        <rect class="rt-box" x="-46" y="0" width="92" height="40" rx="4"></rect>
+        <text class="rt-name" x="0" y="18" text-anchor="middle">RT · 2</text>
+        <text class="rt-sub"  x="0" y="32" text-anchor="middle">valid</text>
+        <line class="strike" x1="-46" y1="20" x2="46" y2="20"></line>
+      </g>
+      <g class="rt rt3" transform="translate(480,170)">
+        <rect class="rt-box" x="-46" y="0" width="92" height="40" rx="4"></rect>
+        <text class="rt-name" x="0" y="18" text-anchor="middle">RT · 3</text>
+        <text class="rt-sub"  x="0" y="32" text-anchor="middle">valid</text>
+        <line class="strike" x1="-46" y1="20" x2="46" y2="20"></line>
+      </g>
+
+      <!-- rotate arrows -->
+      <path class="rotate-arrow ra1" d="M166 190 H254" marker-end="url(#d-tip)"></path>
+      <path class="rotate-arrow ra2" d="M346 190 H434" marker-end="url(#d-tip)"></path>
+      <text class="d-sub ra-label ra1l" x="210" y="182" text-anchor="middle">rotate</text>
+      <text class="d-sub ra-label ra2l" x="390" y="182" text-anchor="middle">rotate</text>
+
+      <!-- access token pill (short-lived, tied to head) -->
+      <g class="access" transform="translate(560,150)">
+        <rect x="0" y="0" width="96" height="26" rx="13"></rect>
+        <text class="access-t" x="48" y="17" text-anchor="middle">access · 15m</text>
+      </g>
+
+      <!-- devices -->
+      <g class="device client">
+        <rect class="d-node" x="40" y="330" width="140" height="46" rx="4"></rect>
+        <text class="d-label" x="110" y="350" text-anchor="middle">your device</text>
+        <text class="d-sub"   x="110" y="365" text-anchor="middle">holds RT · 3</text>
+      </g>
+      <g class="device attacker">
+        <rect class="d-node atk-box" x="430" y="330" width="170" height="46" rx="4"></rect>
+        <text class="d-label atk-t" x="515" y="350" text-anchor="middle">another device</text>
+        <text class="d-sub atk-s"  x="515" y="365" text-anchor="middle">replays RT · 1</text>
+      </g>
+
+      <!-- device -> token links -->
+      <path class="link client-link" d="M110 330 C 200 300, 380 250, 470 210"></path>
+      <path class="link atk-link" d="M515 330 C 400 300, 200 250, 128 212"></path>
+
+      <defs>
+        <marker id="d-tip" markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto">
+          <path d="M0.5,0.5 L6,3 L0.5,5.5" fill="none" stroke="var(--graphite)" stroke-width="1.2"></path>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+
+  <div class="diagram__bar">
+    <span class="diagram__status">
+      <span class="diagram__dot"></span>
+      <span class="diagram__status-text">Idle. Press play to watch a session rotate, then get replayed.</span>
+    </span>
+    <button class="diagram__replay" type="button" data-replay>▷ Play</button>
+  </div>
+
+  <p class="diagram__caption">
+    Every refresh hands back a new token and retires the old one. If an
+    already-rotated token shows up again, that's the fingerprint of a stolen
+    session, and rejecting that one request isn't enough. So I
+    <b>revoke every session</b> for that user at once. For them, it means a leaked
+    token can't quietly hold a door open somewhere else.
+  </p>
+</figure>
+
+<style>
+  .link {
+    fill: none; stroke: var(--mist); stroke-width: 1.5;
+    opacity: 0; transition: opacity 400ms var(--ease), stroke 300ms var(--ease);
+  }
+  .link.on { opacity: 1; stroke: var(--graphite); }
+  .link.suspect { stroke: var(--ember); stroke-dasharray: 5 4; }
+  .link.off { opacity: 0.12; }
+
+  .rt { opacity: 0; transition: opacity 400ms var(--ease); }
+  .rt.on { opacity: 1; }
+  .rt-box {
+    fill: var(--paper); stroke: var(--graphite); stroke-width: 1.25;
+    transition: stroke 300ms var(--ease), fill 300ms var(--ease);
+  }
+  .rt-name { font-family: var(--font-mono); font-size: 12px; fill: var(--ink); }
+  .rt-sub  { font-family: var(--font-mono); font-size: 10px; fill: var(--graphite); letter-spacing: 0.02em; }
+
+  .rt.valid .rt-box { stroke: var(--ink); }
+  .rt.rotated { opacity: 0.45; }
+  .rt.alert .rt-box { stroke: var(--ember); }
+  .rt.alert .rt-name, .rt.alert .rt-sub { fill: var(--ember); }
+
+  /* revoke state — the one moment of color */
+  .rt.rev { opacity: 1; }
+  .rt.rev .rt-box { stroke: var(--ember); fill: var(--ember-12); }
+  .rt.rev .rt-name, .rt.rev .rt-sub { fill: var(--ember); }
+
+  .strike {
+    stroke: var(--ember); stroke-width: 1.75;
+    stroke-dasharray: 92; stroke-dashoffset: 92;
+    transition: stroke-dashoffset 380ms var(--ease);
+  }
+  .rt.rev .strike { stroke-dashoffset: 0; }
+
+  .rotate-arrow {
+    fill: none; stroke: var(--graphite); stroke-width: 1.25;
+    opacity: 0; transition: opacity 350ms var(--ease);
+  }
+  .ra-label { opacity: 0; transition: opacity 350ms var(--ease); }
+  .rotate-arrow.on, .ra-label.on { opacity: 1; }
+
+  .access rect {
+    fill: var(--paper); stroke: var(--graphite); stroke-width: 1.1;
+    transition: stroke 300ms var(--ease), fill 300ms var(--ease);
+  }
+  .access-t { font-family: var(--font-mono); font-size: 10px; fill: var(--graphite); letter-spacing: 0.02em; }
+  .access { opacity: 0; transition: opacity 350ms var(--ease); }
+  .access.on { opacity: 1; }
+  .access.valid rect { stroke: var(--ink); }
+  .access.rev rect { stroke: var(--ember); fill: var(--ember-12); }
+  .access.rev .access-t { fill: var(--ember); }
+
+  .attacker { opacity: 0; transition: opacity 400ms var(--ease); }
+  .attacker.on { opacity: 1; }
+  .attacker.alert .atk-box { stroke: var(--ember); }
+  .attacker.alert .atk-t, .attacker.alert .atk-s { fill: var(--ember); }
+  .device.off { opacity: 0.2; transition: opacity 400ms var(--ease); }
+</style>
+
+<script>
+  type Step = { p: string; text: string; live: 0 | 1; alert?: boolean; dur: number; run: () => void }
+
+  function init(fig: HTMLElement) {
+    const svg = fig.querySelector<SVGSVGElement>('.d-svg')!
+    const statusText = fig.querySelector<HTMLElement>('.diagram__status-text')!
+    const status = fig.querySelector<HTMLElement>('.diagram__status')!
+    const btn = fig.querySelector<HTMLButtonElement>('[data-replay]')!
+    const q = (s: string) => fig.querySelector<SVGElement>(s)!
+    const timers: number[] = []
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+    const rt1 = q('.rt1'), rt2 = q('.rt2'), rt3 = q('.rt3')
+    const setSub = (el: SVGElement, t: string) => { el.querySelector('.rt-sub')!.textContent = t }
+
+    const reset = () => {
+      ;[rt1, rt2, rt3].forEach((r) => r.classList.remove('on', 'valid', 'rotated', 'alert', 'rev'))
+      ;['.l1', '.l2', '.l3', '.client-link', '.atk-link'].forEach((s) => { q(s).classList.remove('on', 'suspect', 'off') })
+      ;['.ra1', '.ra2', '.ra1l', '.ra2l'].forEach((s) => q(s).classList.remove('on'))
+      q('.access').classList.remove('on', 'valid', 'rev')
+      q('.attacker').classList.remove('on', 'alert')
+      q('.client').classList.remove('off')
+      setSub(rt1, 'valid'); setSub(rt2, 'valid'); setSub(rt3, 'valid')
+    }
+
+    const steps: Step[] = [
+      { p: 'issue', text: 'auth server issues RT · 1 to your device', live: 1, dur: 1250, run: () => {
+        q('.l1').classList.add('on'); rt1.classList.add('on', 'valid')
+      }},
+      { p: 'rotate1', text: 'RT · 1 used → rotated → RT · 2 issued', live: 1, dur: 1350, run: () => {
+        q('.ra1').classList.add('on'); q('.ra1l').classList.add('on'); q('.l2').classList.add('on')
+        rt1.classList.remove('valid'); rt1.classList.add('rotated'); setSub(rt1, 'rotated')
+        rt2.classList.add('on', 'valid')
+      }},
+      { p: 'rotate2', text: 'RT · 2 used → rotated → RT · 3 issued', live: 1, dur: 1350, run: () => {
+        q('.ra2').classList.add('on'); q('.ra2l').classList.add('on'); q('.l3').classList.add('on')
+        rt2.classList.remove('valid'); rt2.classList.add('rotated'); setSub(rt2, 'rotated')
+        rt3.classList.add('on', 'valid')
+        q('.access').classList.add('on', 'valid')
+      }},
+      { p: 'steady', text: 'session healthy. RT · 3 current, access token valid 15m', live: 1, dur: 1600, run: () => {
+        q('.client-link').classList.add('on')
+      }},
+      { p: 'replay', text: 'another device presents RT · 1, which already rotated', live: 1, dur: 1700, run: () => {
+        q('.attacker').classList.add('on'); q('.atk-link').classList.add('on', 'suspect')
+      }},
+      { p: 'detect', text: 'token reuse detected', live: 1, alert: true, dur: 1400, run: () => {
+        rt1.classList.add('alert'); q('.attacker').classList.add('alert')
+      }},
+      { p: 'revoke', text: 'revokeAllForUser("suspicious"). every session revoked at once', live: 1, alert: true, dur: 1900, run: () => {
+        ;[rt1, rt2, rt3].forEach((r) => { r.classList.remove('alert', 'rotated'); r.classList.add('rev') })
+        setSub(rt1, 'revoked'); setSub(rt2, 'revoked'); setSub(rt3, 'revoked')
+        q('.access').classList.add('rev'); q('.access').querySelector('.access-t')!.textContent = 'blacklisted'
+        q('.client-link').classList.add('off'); q('.atk-link').classList.add('off')
+        q('.client').classList.add('off')
+      }},
+      { p: 'done', text: 'a compromised session cannot quietly stay alive elsewhere', live: 0, dur: 0, run: () => {} },
+    ]
+
+    const clear = () => { timers.forEach(clearTimeout); timers.length = 0 }
+
+    const staticFrame = () => {
+      clear(); reset()
+      steps.forEach((s) => s.run())
+      svg.dataset.phase = 'done'
+      statusText.textContent = 'Reuse of a rotated token trips revoke-all. Every session gets invalidated at once, yours and the attacker’s.'
+      status.classList.remove('diagram__status--alert')
+      status.dataset.live = '0'
+      btn.textContent = '▷ Play'
+    }
+
+    const run = () => {
+      if (reduce.matches) { staticFrame(); return }
+      clear(); reset()
+      btn.textContent = '↻ Replay'
+      let t = 0
+      steps.forEach((s) => {
+        timers.push(window.setTimeout(() => {
+          s.run()
+          svg.dataset.phase = s.p
+          statusText.textContent = s.text
+          status.dataset.live = String(s.live)
+          status.classList.toggle('diagram__status--alert', !!s.alert)
+        }, t))
+        t += s.dur
+      })
+    }
+
+    btn.addEventListener('click', run)
+    svg.addEventListener('click', run)
+    svg.style.cursor = 'pointer'
+
+    if (reduce.matches) { staticFrame(); return }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { run(); io.disconnect() } })
+    }, { threshold: 0.5 })
+    io.observe(fig)
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-diagram="d-token"]').forEach(init)
+</script>

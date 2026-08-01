@@ -1,0 +1,214 @@
+---
+import Base from '../layouts/Base.astro'
+
+const posts = [
+  {
+    n: '01',
+    slug: '/writing/queue-isolation',
+    title: 'Why I split Nura’s background jobs across two queues',
+    thesis:
+      'One queue is the obvious way to start, and it works right up until one kind of job jams and takes everything else down with it. Splitting them later is a lot more painful than splitting them early.',
+    tradeoff:
+      'You take on more moving parts and a recovery pass to babysit. In return, a failure stays where it happened.',
+    system: 'session-analysis · insight-generation',
+    read: '9 min',
+    glyph: 'queues',
+  },
+  {
+    n: '02',
+    slug: '/writing/token-rotation',
+    title: 'Rotating refresh tokens, and the day one shows up twice',
+    thesis:
+      'Most people rotate refresh tokens for basic hygiene. It turned out to be more useful than that. Once a token dies the moment it’s used, a token that shows up twice is telling you something, and you can act on it.',
+    tradeoff:
+      'Now and then you’ll log out a real user who did nothing wrong. That’s the price for making sure a stolen session can never quietly hang around.',
+    system: 'JWT access · rotating refresh · Redis blacklist',
+    read: '11 min',
+    glyph: 'tokens',
+  },
+]
+---
+
+<Base title="Writing" description="Working notes on backend infrastructure for AI systems: how I isolate background jobs, and how I rotate auth tokens to catch a stolen session.">
+  <section class="shell w-head">
+    <p class="label">Writing</p>
+    <h1 class="serif w-title">Field notes from the layer<br />no one screenshots.</h1>
+    <p class="w-intro measure">
+      These are working notes on the decisions behind the infrastructure I build.
+      I care more about why I made a call than the exact syntax, so there's no
+      code here. I draw the mechanisms instead. Two posts to start. I'll add more
+      when I've got something worth explaining.
+    </p>
+  </section>
+
+  <section class="shell w-list">
+    {posts.map((p) => (
+      <a class="entry" href={p.slug}>
+        <div class="entry__meta">
+          <span class="label">Field note {p.n}</span>
+          <span class="label entry__read">{p.read}</span>
+        </div>
+
+        <div class="entry__body">
+          <h2 class="serif entry__title">{p.title}</h2>
+          <p class="entry__thesis measure">{p.thesis}</p>
+
+          <div class="entry__foot">
+            <p class="entry__tradeoff">
+              <span class="label">The trade-off</span>
+              {p.tradeoff}
+            </p>
+            <p class="entry__system label">{p.system}</p>
+          </div>
+        </div>
+
+        <div class="entry__glyph" aria-hidden="true">
+          {p.glyph === 'queues' ? (
+            <svg viewBox="0 0 132 84" class="glyph">
+              <rect class="g-node" x="2" y="34" width="22" height="16" rx="2" />
+              <line class="g-line g-live" x1="30" y1="26" x2="104" y2="26" />
+              <line class="g-line g-dash" x1="30" y1="58" x2="104" y2="58" />
+              <rect class="g-node" x="108" y="18" width="22" height="16" rx="2" />
+              <rect class="g-node g-idle" x="108" y="50" width="22" height="16" rx="2" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 132 84" class="glyph">
+              <rect class="g-node g-idle" x="6" y="34" width="30" height="16" rx="2" />
+              <rect class="g-node g-idle" x="51" y="34" width="30" height="16" rx="2" />
+              <rect class="g-node" x="96" y="34" width="30" height="16" rx="2" />
+              <line class="g-strike" x1="6" y1="42" x2="36" y2="42" />
+              <line class="g-strike" x1="51" y1="42" x2="81" y2="42" />
+            </svg>
+          )}
+        </div>
+
+        <span class="entry__cta label" aria-hidden="true">Read →</span>
+      </a>
+    ))}
+  </section>
+
+  <section class="shell w-foot">
+    <hr class="hr" />
+    <p class="w-journal measure">
+      This is more of a running journal than a publishing schedule. I write one
+      up when a decision was interesting enough to be worth making, and worth
+      explaining afterward.
+    </p>
+  </section>
+</Base>
+
+<style>
+  .w-head { padding-top: clamp(2rem, 1.5rem + 3vw, 4rem); }
+  .w-title {
+    font-size: var(--step-3);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0.7rem 0 0;
+  }
+  .w-intro {
+    margin-top: clamp(1.2rem, 0.8rem + 1.5vw, 1.8rem);
+    color: var(--graphite);
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  .w-list {
+    margin-top: clamp(2.5rem, 1.5rem + 4vw, 4.5rem);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .entry {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'meta glyph'
+      'body glyph'
+      'cta  glyph';
+    gap: 0.4rem 2.5rem;
+    align-items: start;
+    padding: clamp(1.8rem, 1.2rem + 2vw, 3rem) 0;
+    border-top: 1px solid var(--mist);
+    transition: background 200ms var(--ease);
+  }
+  .entry:last-of-type { border-bottom: 1px solid var(--mist); }
+  .entry:hover { background: var(--ink-04); }
+
+  .entry__meta {
+    grid-area: meta;
+    display: flex;
+    justify-content: space-between;
+    max-width: 46ch;
+    margin-bottom: 0.9rem;
+  }
+  .entry__read { color: var(--mist); }
+
+  .entry__body { grid-area: body; }
+  .entry__title {
+    font-size: var(--step-2);
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    transition: color 200ms var(--ease);
+  }
+  .entry__thesis {
+    margin-top: 0.8rem;
+    color: var(--graphite);
+    font-size: var(--step-1);
+    line-height: 1.45;
+  }
+  .entry__foot {
+    margin-top: 1.4rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem 2.5rem;
+    align-items: baseline;
+  }
+  .entry__tradeoff {
+    max-width: 52ch;
+    color: var(--graphite);
+    font-size: var(--step--1);
+    line-height: 1.55;
+  }
+  .entry__tradeoff .label { display: block; margin-bottom: 0.3rem; color: var(--ink); }
+  .entry__system { color: var(--graphite); }
+
+  .entry__cta {
+    grid-area: cta;
+    margin-top: 1.4rem;
+    color: var(--graphite);
+    transition: color 200ms var(--ease), transform 200ms var(--ease);
+  }
+  .entry:hover .entry__cta { color: var(--ink); transform: translateX(4px); }
+
+  .entry__glyph {
+    grid-area: glyph;
+    align-self: center;
+    width: clamp(110px, 12vw, 152px);
+  }
+  .glyph { width: 100%; height: auto; }
+  .g-node { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+  .g-node.g-idle { stroke: var(--mist); }
+  .g-line { stroke-width: 1.5; }
+  .g-live { stroke: var(--ink); }
+  .g-dash { stroke: var(--mist); stroke-dasharray: 4 4; }
+  .g-strike { stroke: var(--graphite); stroke-width: 1.5; }
+
+  .w-foot { margin-top: clamp(2.5rem, 1.5rem + 3vw, 4rem); }
+  .w-journal {
+    margin-top: 1.4rem;
+    color: var(--graphite);
+    font-size: var(--step-0);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 40rem) {
+    .entry {
+      grid-template-columns: 1fr;
+      grid-template-areas: 'meta' 'glyph' 'body' 'cta';
+      gap: 0.4rem 0;
+    }
+    .entry__glyph { width: 120px; margin: 0.5rem 0 1.2rem; }
+    .entry__meta { max-width: none; }
+  }
+</style>

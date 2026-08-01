@@ -1,0 +1,161 @@
+---
+import Base from '../layouts/Base.astro'
+import QueueIsolationDiagram from '../components/QueueIsolationDiagram.astro'
+import TokenRotationDiagram from '../components/TokenRotationDiagram.astro'
+
+const meta = [
+  { k: 'Role', v: 'Backend architecture & implementation' },
+  { k: 'Stack', v: 'Node · TypeScript · PostgreSQL · Redis · BullMQ' },
+  { k: 'Shape', v: 'AI journaling app · async agent pipelines' },
+]
+---
+
+<Base title="Work · Nura" description="How I built Nura's backend: two isolated job queues with a recovery pass, and rotating auth tokens that catch a reused token and log the user out everywhere.">
+  <article class="case">
+    <header class="case__head shell">
+      <p class="label">Case study · 01</p>
+      <h1 class="serif case__title">Nura</h1>
+      <p class="case__standfirst measure">
+        Nura is an AI journaling app, built on background agent jobs. The app
+        itself is calm and almost wordless, but there's a lot going on
+        underneath it. Two of those decisions matter most to me: how I keep the
+        background work from taking itself down when something fails, and how I
+        decide a session can still be trusted. Both are running below.
+      </p>
+
+      <dl class="case__meta">
+        {meta.map((m) => (
+          <div class="case__meta-item">
+            <dt class="label">{m.k}</dt>
+            <dd>{m.v}</dd>
+          </div>
+        ))}
+      </dl>
+    </header>
+
+    <div class="shell"><hr class="hr" /></div>
+
+    <!-- Diagram 1 -->
+    <section class="case__section shell">
+      <div class="case__lead measure">
+        <h2 class="serif case__h2">One stuck job shouldn't freeze the whole app</h2>
+        <p>
+          When a session closes, I kick off two background jobs. One looks back
+          over what happened in the session. The other generates an insight, but
+          only when the user's patterns cross a threshold. I put these on
+          <b>separate queues</b> on purpose. If the analysis job stalls, it can't
+          starve insight generation or block it, and a recovery pass comes back
+          around for anything left stuck. The diagram below runs the real thing.
+        </p>
+      </div>
+      <QueueIsolationDiagram />
+    </section>
+
+    <!-- Diagram 2 -->
+    <section class="case__section shell">
+      <div class="case__lead measure">
+        <h2 class="serif case__h2">A stolen session shouldn't stay alive</h2>
+        <p>
+          Access uses a short-lived token. The long-lived one <b>rotates every
+          time it's used</b>. That rotation is what lets me catch theft. If a
+          token that already rotated shows up again, two people are holding it,
+          and one of them shouldn't be. So I revoke every session for that user
+          at once. Killing only the suspicious request would leave the attacker a
+          working token somewhere else. The diagram catches a reuse as it happens.
+        </p>
+      </div>
+      <TokenRotationDiagram />
+    </section>
+
+    <div class="shell"><hr class="hr" /></div>
+
+    <!-- system at a glance -->
+    <section class="case__section shell">
+      <div class="case__lead measure">
+        <h2 class="serif case__h2">The rest of the system, briefly</h2>
+      </div>
+      <div class="case__facts">
+        <div class="case__fact">
+          <p class="label">Provider abstraction</p>
+          <p>Claude runs as the main model, with OpenRouter as a fallback and a mock version for tests. Switching models means changing one environment variable, and the code stays untouched.</p>
+        </div>
+        <div class="case__fact">
+          <p class="label">Context assembly</p>
+          <p>Each user's context comes from their strongest patterns plus their most recent session summaries, all kept under a 4k-token budget. Every request logs what went into it, so cost and behavior stay easy to trace later.</p>
+        </div>
+        <div class="case__fact">
+          <p class="label">Clean architecture</p>
+          <p>The domain, application, infrastructure, and presentation layers stay separate, wired together with constructor injection. That keeps every use case testable without spinning up a database or an HTTP server.</p>
+        </div>
+        <div class="case__fact">
+          <p class="label">Server-driven UI</p>
+          <p>The app pulls its feature flags, config, and copy from a bootstrap endpoint when it starts. So rolling out a feature or fixing a bit of wording doesn't need an App Store update.</p>
+        </div>
+      </div>
+    </section>
+
+    <aside class="case__note shell">
+      <p class="label">Note</p>
+      <p>The architecture here is real and running. Both diagrams model the actual mechanisms from the codebase. I'm still refining the final numbers and some of the wording.</p>
+    </aside>
+  </article>
+</Base>
+
+<style>
+  .case__head { padding-top: clamp(2rem, 1.5rem + 3vw, 4rem); }
+  .case__title {
+    font-size: var(--step-4);
+    line-height: 1;
+    margin: 0.6rem 0 0;
+    letter-spacing: -0.02em;
+  }
+  .case__standfirst {
+    margin-top: clamp(1.2rem, 0.8rem + 2vw, 2rem);
+    font-size: var(--step-1);
+    color: var(--graphite);
+    line-height: 1.5;
+  }
+  .case__meta {
+    margin-top: clamp(1.6rem, 1rem + 2vw, 2.6rem);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem 2.6rem;
+  }
+  .case__meta-item dt { margin-bottom: 0.35rem; }
+  .case__meta-item dd { font-family: var(--font-mono); font-size: var(--step--1); color: var(--ink); }
+
+  .case__section { padding-top: clamp(2.5rem, 1.5rem + 4vw, 4.5rem); }
+  .case__lead { margin-bottom: 0.5rem; }
+  .case__h2 {
+    font-size: var(--step-2);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin-bottom: 0.9rem;
+  }
+  .case__lead p { color: var(--graphite); font-size: var(--step-0); line-height: 1.6; }
+  .case__lead b { color: var(--ink); font-weight: 500; }
+
+  .case__facts {
+    margin-top: 1.4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(1.4rem, 1rem + 2vw, 2.6rem);
+  }
+  .case__fact p:first-child { margin-bottom: 0.5rem; }
+  .case__fact p:last-child { color: var(--graphite); font-size: var(--step-0); line-height: 1.55; }
+
+  .case__note {
+    margin-top: clamp(2.5rem, 1.5rem + 3vw, 4rem);
+    padding: 1.3rem 1.5rem;
+    background: var(--panel);
+    border: 1px solid var(--mist);
+    border-radius: 4px;
+    max-width: 60ch;
+  }
+  .case__note p:first-child { margin-bottom: 0.4rem; }
+  .case__note p:last-child { color: var(--graphite); font-size: var(--step--1); line-height: 1.55; }
+
+  @media (max-width: 40rem) {
+    .case__facts { grid-template-columns: 1fr; }
+  }
+</style>

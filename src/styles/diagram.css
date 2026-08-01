@@ -1,0 +1,124 @@
+/* =========================================================================
+   Diagram frame — shared chrome for the two live architecture diagrams.
+   The diagrams carry the entire motion + color budget of the site.
+   ========================================================================= */
+
+.diagram {
+  --move: 1100ms;
+  margin-block: clamp(2.5rem, 1.5rem + 3vw, 4rem);
+}
+
+.diagram__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+.diagram__kicker { color: var(--graphite); }
+
+/* the inset instrument panel */
+.diagram__stage {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--mist);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.diagram__svg { width: 100%; height: auto; display: block; }
+
+/* live status read-out + replay control */
+.diagram__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem clamp(0.9rem, 0.6rem + 1vw, 1.4rem);
+  border-top: 1px solid var(--mist);
+  background: color-mix(in srgb, var(--panel) 60%, var(--paper));
+}
+.diagram__status {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--graphite);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  min-height: 1.2em;
+}
+.diagram__status b { color: var(--ink); font-weight: 500; }
+.diagram__status--alert b { color: var(--ember); }
+
+.diagram__dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--graphite);
+  transition: background 200ms var(--ease);
+}
+.diagram__status[data-live='1'] .diagram__dot { background: var(--ink); }
+.diagram__status--alert .diagram__dot { background: var(--ember); }
+
+.diagram__replay {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  background: transparent;
+  border: 1px solid var(--mist);
+  border-radius: 3px;
+  padding: 0.5em 0.95em;
+  cursor: pointer;
+  transition: color 180ms var(--ease), border-color 180ms var(--ease), background 180ms var(--ease);
+}
+.diagram__replay:hover { color: var(--ink); border-color: var(--graphite); }
+.diagram__replay:active { background: var(--ink-04); }
+
+/* caption below the frame */
+.diagram__caption {
+  margin-top: 1rem;
+  max-width: 56ch;
+  color: var(--graphite);
+  font-size: var(--step-0);
+  line-height: 1.55;
+}
+.diagram__caption b { color: var(--ink); font-weight: 500; }
+
+/* ---- shared SVG primitives -------------------------------------------- */
+.d-node {
+  fill: var(--paper);
+  stroke: var(--graphite);
+  stroke-width: 1.25;
+  transition: stroke 300ms var(--ease), fill 300ms var(--ease), opacity 300ms var(--ease);
+}
+.d-track {
+  fill: none;
+  stroke: var(--mist);
+  stroke-width: 1.5;
+  transition: stroke 400ms var(--ease), opacity 400ms var(--ease);
+}
+.d-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  fill: var(--ink);
+  letter-spacing: 0.01em;
+}
+.d-sub {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  fill: var(--graphite);
+  letter-spacing: 0.02em;
+}
+.d-pkt {
+  transition: transform var(--move) var(--ease), opacity 300ms var(--ease);
+}
+.d-pkt rect { fill: var(--ink); rx: 3; }
+.d-pkt text { font-family: var(--font-mono); font-size: 9.5px; fill: var(--paper); letter-spacing: 0.03em; }
+
+/* a small state chip rendered in SVG */
+.d-chip rect { fill: var(--paper); stroke: var(--mist); stroke-width: 1; }
+.d-chip text { font-family: var(--font-mono); font-size: 10px; fill: var(--graphite); letter-spacing: 0.04em; }
+
+@media (prefers-reduced-motion: reduce) {
+  .d-pkt { transition-duration: 0.001ms; }
+}

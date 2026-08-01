@@ -1,0 +1,130 @@
+---
+import Article from '../../layouts/Article.astro'
+import QueueIsolationDiagram from '../../components/QueueIsolationDiagram.astro'
+---
+
+<Article
+  title="Why I split Nura's background jobs across two queues"
+  n="01"
+  read="9 min"
+  system="session-analysis · insight-generation"
+  standfirst="One queue is simpler right up until one kind of job jams and takes the rest with it. This is why I split Nura's background work into separate queues, and how a recovery pass keeps a stuck job from vanishing."
+>
+  <div class="prose">
+    <p>
+      When someone finishes a journaling session in Nura, two things need to
+      happen in the background. First, the app looks back over the session and
+      writes up what happened, the emotional thread, the patterns worth holding
+      onto. Second, if those patterns cross a certain threshold, it generates an
+      insight for the user. Neither of these should hold up the app. The person
+      has already closed the session and put their phone down. So both run as
+      background jobs.
+    </p>
+
+    <p>
+      The obvious way to run background jobs is to throw them all on one queue
+      and let a pool of workers chew through them. That's where I started. The
+      diagram below is why I didn't stay there.
+    </p>
+
+    <div class="breakout">
+      <QueueIsolationDiagram />
+    </div>
+
+    <h2>The one-queue version, and why it breaks</h2>
+    <p>
+      A single queue is genuinely the right first move. It's less to build, less
+      to think about, and for a while it just works. The trouble shows up the
+      first time one kind of job starts misbehaving.
+    </p>
+    <p>
+      Say the analysis job calls out to a model provider, and that provider gets
+      slow or starts rate-limiting me. Now those jobs pile up and hang onto
+      workers while they wait. Insight generation is sitting in the same queue
+      behind them. It has nothing to do with the model being slow, but it's stuck
+      anyway, because every worker is busy waiting on analysis. One slow
+      dependency, and a completely unrelated feature stops working. That's the
+      part that bothered me. How far a problem spread had nothing to do with
+      where the problem actually was.
+    </p>
+    <p>
+      Splitting the two jobs onto their own queues, each with its own workers,
+      fixes exactly that. When analysis backs up, it backs up on its own queue.
+      Insight generation keeps draining right past it, because the workers
+      pulling from it were never in that traffic jam in the first place.
+    </p>
+
+    <h2>What "stalled" actually means</h2>
+    <p>
+      Stalled sounds vague, so it's worth being concrete about it. A job doesn't
+      usually fail cleanly with an error I can catch and retry. The nastier case
+      is a job that got picked up by a worker, and then the worker disappeared. A
+      deploy goes out and the process restarts mid-job. The container gets killed
+      and rescheduled. The worker crashes on something unrelated. The job is now
+      marked as active, locked to a worker that no longer exists, and nobody is
+      processing it.
+    </p>
+    <p>
+      It hasn't failed. It hasn't finished. It's just frozen, holding a lock,
+      waiting on a worker that's never coming back. This is the case that quietly
+      loses data if you aren't looking for it. A job that fails at least raises
+      its hand. A stalled one sits there silent.
+    </p>
+
+    <h2>Why I didn't just add retries</h2>
+    <p>
+      The instinct is to handle this inside the job. Wrap it in retry logic, add
+      some backoff, move on. And retries are worth having for the honest
+      failures, the timeout that clears itself on a second attempt. But retries
+      can't help with the stalled case, because the code that would do the
+      retrying is the exact code that died. If the worker is gone, there's
+      nothing left running to notice that it's gone. You can't ask a dead process
+      to reschedule itself.
+    </p>
+    <p>
+      So the recovery has to live outside the job. It's a separate scheduled
+      worker whose whole purpose is to look for work that got abandoned. Every so
+      often it checks for jobs that have been locked and untouched longer than
+      they should be, and it puts them back on the queue for a healthy worker to
+      pick up. Because it runs on its own, it doesn't care whether the original
+      worker crashed, got redeployed, or vanished for some reason I haven't
+      thought of yet. If a job is stuck, it gets found and run again.
+    </p>
+
+    <h2>What this saves a real user from</h2>
+    <p>
+      Here's the failure I was actually trying to prevent, in human terms. A
+      user finishes a hard session. Behind the scenes, the job that would
+      generate their insight gets picked up right as a deploy goes out. The
+      worker restarts. The job freezes. No error fires. No alert goes off. The
+      user just never gets their insight, and nothing tells them it was supposed
+      to exist. Nothing tells me it went missing either. It's the kind of bug you
+      only find months later when you go digging, if you ever do.
+    </p>
+    <p>
+      Isolated queues plus a recovery pass turn that silent loss into a short
+      delay. The insight shows up a few minutes late instead of never. For this
+      product, where the whole promise is that the app notices patterns the user
+      can't see themselves, an insight that quietly never arrives is close to the
+      worst thing that can go wrong without anyone noticing.
+    </p>
+
+    <h2>The trade-off, and what I'd still watch</h2>
+    <p>
+      None of this is free. Two queues mean two sets of workers to run and keep
+      an eye on, and the recovery pass is one more moving piece that can have its
+      own bugs. If I get the "stuck for too long" threshold wrong, I could
+      re-enqueue a job that was actually still running, just slow, and end up
+      doing the same work twice. That pushed me to make the jobs safe to run more
+      than once, which is its own bit of care to get right.
+    </p>
+    <p>
+      If I were starting over, I'd still begin with one queue. I don't think the
+      isolation is worth building on day one for a product with no users. But I'd
+      draw the line early, before there's real traffic, because splitting a busy
+      queue later is a much worse afternoon than splitting an empty one. The
+      recovery pass I'd add the moment real user data starts flowing through,
+      because that's the moment silent loss stops being theoretical.
+    </p>
+  </div>
+</Article>

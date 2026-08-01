@@ -1,0 +1,132 @@
+---
+import Base from '../layouts/Base.astro'
+---
+
+<Base title="Bishal Hona">
+  <section class="hero shell">
+    <p class="label hero__kicker">Infrastructure for LLM systems</p>
+
+    <h1 class="serif hero__title">
+      Backend that stays calm<br />when things break.
+    </h1>
+
+    <p class="hero__lede measure">
+      I'm Bishal Hona, a backend engineer. I build the parts of AI products that
+      live between the model and the person using it. The background jobs, the
+      memory that has to survive across sessions, the streaming, the auth. The
+      stuff that's invisible when it works.
+    </p>
+
+    <p class="hero__ai serif">
+      Plenty of AI products look great in a demo. I build the part that keeps
+      them working once real people are using them.
+    </p>
+
+    <div class="hero__actions">
+      <a class="cta" href="/work">
+        <span>See how I built Nura</span>
+        <span class="cta__arr" aria-hidden="true">→</span>
+      </a>
+      <a class="cta cta--ghost" href="/writing">Read the writing</a>
+    </div>
+  </section>
+
+  <section class="shell focus">
+    <hr class="hr" />
+    <dl class="focus__grid">
+      <div class="focus__item">
+        <dt class="label">01 · Isolated queues</dt>
+        <dd>I run the background AI jobs in separate queues, so if one kind of task breaks it can't drag the rest down with it. And if a job gets stuck partway, a recovery process picks it back up on its own instead of letting it disappear.</dd>
+      </div>
+      <div class="focus__item">
+        <dt class="label">02 · Memory that lasts</dt>
+        <dd>I build memory that carries from one session to the next. I keep a tight cap on how much of it goes to the model at once, and I record which context produced a given response so I can go back and check.</dd>
+      </div>
+      <div class="focus__item">
+        <dt class="label">03 · Streaming responses</dt>
+        <dd>Responses stream in as the model writes them, so nobody sits watching a blank screen while they wait for the whole answer to land.</dd>
+      </div>
+      <div class="focus__item">
+        <dt class="label">04 · Session security</dt>
+        <dd>Sessions rotate on their own. If a stolen session token ever gets reused, I log every one of that user's sessions out right away.</dd>
+      </div>
+    </dl>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-top: clamp(3rem, 2rem + 6vw, 7rem);
+    padding-bottom: clamp(2rem, 1.5rem + 3vw, 4rem);
+  }
+  .hero__kicker { margin-bottom: 1.6rem; }
+  .hero__title {
+    font-size: var(--step-4);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    max-width: 18ch;
+  }
+  .hero__lede {
+    margin-top: clamp(1.5rem, 1rem + 2vw, 2.4rem);
+    font-size: var(--step-1);
+    color: var(--graphite);
+    line-height: 1.5;
+  }
+  .hero__ai {
+    margin-top: clamp(1.8rem, 1.2rem + 2vw, 2.8rem);
+    padding-left: 1.1rem;
+    border-left: 2px solid var(--ink);
+    max-width: 46ch;
+    font-size: var(--step-1);
+    font-style: italic;
+    color: var(--ink);
+    line-height: 1.45;
+  }
+
+  .hero__actions {
+    margin-top: clamp(2rem, 1.4rem + 2vw, 3rem);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem 1.6rem;
+    align-items: center;
+  }
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--ink);
+    padding: 0.85em 1.3em;
+    border-radius: 3px;
+    border: 1px solid var(--ink);
+    transition: background 200ms var(--ease), color 200ms var(--ease);
+  }
+  .cta__arr { transition: transform 220ms var(--ease); }
+  .cta:hover { background: transparent; color: var(--ink); }
+  .cta:hover .cta__arr { transform: translateX(4px); }
+  .cta--ghost {
+    color: var(--graphite);
+    background: transparent;
+    border-color: var(--mist);
+  }
+  .cta--ghost:hover { color: var(--ink); border-color: var(--graphite); }
+
+  .focus { padding-top: clamp(3rem, 2rem + 4vw, 5rem); }
+  .focus__grid {
+    margin-top: clamp(1.6rem, 1rem + 2vw, 2.6rem);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(1.5rem, 1rem + 3vw, 3.5rem);
+  }
+  .focus__item dt { margin-bottom: 0.7rem; color: var(--ink); }
+  .focus__item dd { color: var(--graphite); font-size: var(--step-0); line-height: 1.55; }
+
+  @media (max-width: 46rem) {
+    .focus__grid { grid-template-columns: 1fr; gap: 1.8rem; }
+    .hero__title { max-width: none; }
+  }
+</style>

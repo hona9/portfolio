@@ -1,0 +1,86 @@
+---
+import Base from './Base.astro'
+
+interface Props {
+  title: string
+  n: string
+  read: string
+  system: string
+  standfirst: string
+  description?: string
+}
+const { title, n, read, system, standfirst, description } = Astro.props
+---
+
+<Base title={title} description={description ?? standfirst}>
+  <article class="art">
+    <header class="art__head shell">
+      <p class="label"><a href="/writing" class="art__back">Writing</a> · Field note {n}</p>
+      <h1 class="serif art__title measure">{title}</h1>
+      <p class="art__standfirst measure">{standfirst}</p>
+      <div class="art__meta">
+        <span class="label">{read} read</span>
+        <span class="label art__sys">{system}</span>
+      </div>
+    </header>
+
+    <div class="shell"><hr class="hr" /></div>
+
+    <div class="art__body shell">
+      <slot />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .art__head { padding-top: clamp(2rem, 1.5rem + 3vw, 4rem); }
+  .art__back { color: var(--graphite); transition: color 200ms var(--ease); }
+  .art__back:hover { color: var(--ink); }
+  .art__title {
+    font-size: var(--step-3);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0.7rem 0 0;
+  }
+  .art__standfirst {
+    margin-top: clamp(1rem, 0.7rem + 1.5vw, 1.6rem);
+    font-size: var(--step-1);
+    color: var(--graphite);
+    line-height: 1.5;
+  }
+  .art__meta {
+    margin-top: 1.4rem;
+    display: flex;
+    gap: 1.6rem;
+  }
+  .art__sys { color: var(--mist); }
+
+  .art__body { padding-top: clamp(2rem, 1.5rem + 2vw, 3rem); }
+
+  /* prose */
+  .art__body :global(.prose) { max-width: var(--measure); }
+  .art__body :global(.prose > * + *) { margin-top: 1.3rem; }
+  .art__body :global(.prose h2) {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--step-2);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    margin-top: 2.6rem;
+  }
+  .art__body :global(.prose p) { color: var(--graphite); line-height: 1.68; }
+  .art__body :global(.prose b),
+  .art__body :global(.prose strong) { color: var(--ink); font-weight: 500; }
+  .art__body :global(.prose .draft) {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--graphite);
+    background: var(--panel);
+    border: 1px solid var(--mist);
+    border-radius: 4px;
+    padding: 1rem 1.2rem;
+    line-height: 1.55;
+  }
+  /* the embedded diagram breaks out of the reading measure */
+  .art__body :global(.prose .breakout) { max-width: none; }
+</style>

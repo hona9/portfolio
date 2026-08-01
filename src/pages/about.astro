@@ -1,0 +1,113 @@
+---
+import Base from '../layouts/Base.astro'
+
+const roles = [
+  { org: 'Nura', role: 'Backend architecture for an AI journaling app', when: '2025' },
+  { org: 'Intosoft', role: 'Backend engineer on search, real-time, and billing', when: '2024–2025' },
+  { org: 'Yatri Design Studio', role: 'Software engineer on EV charging admin and inventory', when: '2023–2024' },
+  { org: 'Leapfrog Technology', role: 'Software engineer intern', when: '2022' },
+]
+---
+
+<Base title="About" description="Bishal Hona, a backend engineer with about three years building Node and TypeScript systems, now working on the infrastructure behind AI products.">
+  <section class="shell ab-head">
+    <p class="label">About</p>
+    <h1 class="serif ab-title measure">
+      I work in the layer between a model's API and the person waiting on the
+      other end.
+    </h1>
+  </section>
+
+  <section class="shell ab-body">
+    <div class="ab-prose measure flow">
+      <p>
+        I've spent about three years building Node and TypeScript backends.
+        Somewhere in there I realized the prompt is rarely the hard part of an AI
+        product. The hard part is everything around it. Keeping background jobs
+        from taking each other down when one of them fails. Holding onto a user's
+        history so it still makes sense to the model months later. Getting
+        responses to stream so the app feels alive. Making the auth hold up when
+        someone actually pokes at it.
+      </p>
+      <p>
+        I care most about the parts of a system you never notice when they're
+        working. I keep orchestration, tool calls, and storage cleanly separated,
+        and I do it for a practical reason: it lets me think through what happens
+        when something fails before it actually does. I try to build things that
+        stay calm when they break. And I try to leave enough of a trail that the
+        next person can follow why I did what I did.
+      </p>
+      <p>
+        I don't do model training or MLOps. I work on the backend that sits
+        between the model and the product, and I think that's where a lot of AI
+        apps quietly succeed or fail.
+      </p>
+      <p>
+        AI has made me a lot faster, but it hasn't done the thinking for me, and
+        I don't expect it to.
+      </p>
+    </div>
+
+    <div class="ab-side">
+      <p class="label ab-side__label">Background</p>
+      <ul class="ab-timeline">
+        {roles.map((r) => (
+          <li class="ab-role">
+            <span class="ab-role__when label">{r.when}</span>
+            <span class="ab-role__org mono">{r.org}</span>
+            <span class="ab-role__desc">{r.role}</span>
+          </li>
+        ))}
+      </ul>
+
+      <p class="label ab-side__label ab-side__label--2">Working with</p>
+      <p class="ab-stack mono">
+        Node · TypeScript · PostgreSQL · Redis · BullMQ · Socket.IO · Docker · AWS
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .ab-head { padding-top: clamp(2rem, 1.5rem + 3vw, 4rem); }
+  .ab-title {
+    font-size: var(--step-3);
+    line-height: 1.12;
+    letter-spacing: -0.018em;
+    margin-top: 0.8rem;
+  }
+
+  .ab-body {
+    margin-top: clamp(2.5rem, 1.5rem + 4vw, 4.5rem);
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: clamp(2rem, 1rem + 4vw, 5rem);
+    align-items: start;
+  }
+  .ab-prose p { font-size: var(--step-1); line-height: 1.6; color: var(--graphite); }
+  .ab-prose b { color: var(--ink); }
+
+  .ab-side { position: sticky; top: 2rem; }
+  .ab-side__label { display: block; margin-bottom: 1.1rem; }
+  .ab-side__label--2 { margin-top: 2.4rem; }
+
+  .ab-timeline { list-style: none; padding: 0; display: flex; flex-direction: column; }
+  .ab-role {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+    padding: 0.9rem 0;
+    border-top: 1px solid var(--mist);
+  }
+  .ab-role:last-child { border-bottom: 1px solid var(--mist); }
+  .ab-role__when { color: var(--graphite); }
+  .ab-role__org { color: var(--ink); font-size: var(--step-0); }
+  .ab-role__desc { color: var(--graphite); font-size: var(--step--1); line-height: 1.45; }
+
+  .ab-stack { color: var(--graphite); font-size: var(--step--1); line-height: 1.9; letter-spacing: 0.01em; }
+
+  @media (max-width: 46rem) {
+    .ab-body { grid-template-columns: 1fr; }
+    .ab-side { position: static; }
+  }
+</style>

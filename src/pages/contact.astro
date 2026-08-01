@@ -1,0 +1,83 @@
+---
+import Base from '../layouts/Base.astro'
+
+const links = [
+  { k: 'Email', v: 'dev.hona9@gmail.com', href: 'mailto:dev.hona9@gmail.com' },
+  { k: 'LinkedIn', v: 'in/bishal-hona', href: 'https://www.linkedin.com/in/bishal-hona' },
+]
+---
+
+<Base title="Contact" description="Get in touch with Bishal Hona about backend and infrastructure work on AI systems.">
+  <section class="shell ct">
+    <p class="label">Contact</p>
+    <h1 class="serif ct__title measure">
+      If you're building an AI product and the hard part lives underneath the
+      model, let's talk.
+    </h1>
+
+    <p class="ct__note measure">
+      I'm open to backend and infrastructure work on AI systems, whether that's
+      full-time or a shorter piece of work. If you already know what you're
+      worried might break, even better. That's usually a good first conversation.
+    </p>
+
+    <ul class="ct__links">
+      {links.map((l) => (
+        <li class="ct__link-row">
+          <span class="label ct__k">{l.k}</span>
+          <a class="ct__v mono" href={l.href} target={l.href.startsWith('http') ? '_blank' : undefined} rel="noopener">
+            {l.v}
+            <span class="ct__arr" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .ct { padding-top: clamp(2.5rem, 1.5rem + 4vw, 5rem); }
+  .ct__title {
+    font-size: var(--step-3);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-top: 0.8rem;
+  }
+  .ct__note {
+    margin-top: clamp(1.2rem, 0.8rem + 2vw, 2rem);
+    font-size: var(--step-1);
+    color: var(--graphite);
+    line-height: 1.55;
+  }
+
+  .ct__links {
+    list-style: none;
+    padding: 0;
+    margin-top: clamp(2.5rem, 1.5rem + 3vw, 4rem);
+    max-width: 40rem;
+  }
+  .ct__link-row {
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem;
+    padding: 1.1rem 0;
+    border-top: 1px solid var(--mist);
+  }
+  .ct__link-row:last-child { border-bottom: 1px solid var(--mist); }
+  .ct__k { flex: 0 0 6rem; color: var(--graphite); }
+  .ct__v {
+    font-size: var(--step-1);
+    color: var(--ink);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6em;
+    transition: color 200ms var(--ease);
+  }
+  .ct__arr { transition: transform 220ms var(--ease); color: var(--graphite); }
+  .ct__v:hover .ct__arr { transform: translateX(5px); color: var(--ink); }
+
+  @media (max-width: 34rem) {
+    .ct__link-row { flex-direction: column; gap: 0.3rem; }
+    .ct__k { flex-basis: auto; }
+  }
+</style>
