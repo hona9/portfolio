@@ -7,7 +7,7 @@ import { defineConfig } from 'astro/config'
 // No adapter needed — every route is prerendered to HTML.
 export default defineConfig({
   output: 'static',
-  site: 'https://bishalhona.com',
+  site: 'https://bishalhona.nuraheals.com',
   build: { format: 'directory' },
   trailingSlash: 'ignore',
 })

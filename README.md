@@ -1,4 +1,4 @@
-# bishalhona.com
+# bishalhona.nuraheals.com
 
 Personal portfolio for Bishal Hona — backend engineer, infrastructure for
 LLM-powered systems. Built with [Astro](https://astro.build), static output.
