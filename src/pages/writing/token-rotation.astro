@@ -49,20 +49,20 @@ import TokenRotationDiagram from '../../components/TokenRotationDiagram.astro'
 
     <h2>Why the refresh token is stored hashed</h2>
     <p>
-      I never store the refresh token as-is. I hash it and store the hash, the
-      same way you'd handle a password. The reason is simple. My database is not
-      the only place I have to worry about. Backups get made, logs capture more
-      than they should, and databases occasionally end up somewhere they were
-      never meant to be. If any of that happens and the tokens are sitting there
-      in plain text, every one of them is immediately usable by whoever is
-      holding the copy.
+      The refresh token is never stored as-is. It gets hashed, and only the hash
+      goes into the database, the same way you'd handle a password. I do this
+      because the database is not the only place a token can end up. Backups get
+      made, logs capture more than they should, and databases occasionally end up
+      somewhere they were never meant to be. If any of that happens and the
+      tokens are sitting there in plain text, every one of them is immediately
+      usable by whoever is holding the copy.
     </p>
     <p>
       If they're hashed, a leaked database is just a pile of hashes that can't be
-      replayed against my server. When a real token comes in, I hash it the same
-      way and compare. Same idea as passwords, and the same reasoning behind it:
-      assume the store will leak one day, and make the leak worthless when it
-      does.
+      replayed against my server. When a real token comes in, it's hashed the
+      same way and compared against what's stored. Same idea as passwords, and
+      the same reasoning behind it: assume the store will leak one day, and make
+      the leak worthless when it does.
     </p>
 
     <h2>What reuse means, and why I kill everything</h2>
@@ -88,7 +88,7 @@ import TokenRotationDiagram from '../../components/TokenRotationDiagram.astro'
 
     <h2>The mobile race I didn't see coming</h2>
     <p>
-      There's an access token blacklist in Redis so I can kill a token
+      There's an access token blacklist in Redis, so a token can be killed
       immediately instead of waiting out its fifteen minutes. That part is
       straightforward. The part that bit me was on the phone.
     </p>
@@ -97,8 +97,8 @@ import TokenRotationDiagram from '../../components/TokenRotationDiagram.astro'
       the user's history, their settings. The access token has just expired. So
       all of those requests come back 401 at roughly the same instant. Each one
       independently decides its token expired and it should refresh, and each one
-      fires off a refresh carrying the same refresh token. Now I've got three or
-      four refresh calls racing, all holding a token that's only valid once. The
+      fires off a refresh carrying the same refresh token. Now three or four
+      refresh calls are racing, all holding a token that's only valid once. The
       first one wins and rotates it. The rest land a moment later carrying what
       is now an already-used token.
     </p>

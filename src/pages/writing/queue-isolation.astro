@@ -39,8 +39,8 @@ import QueueIsolationDiagram from '../../components/QueueIsolationDiagram.astro'
     </p>
     <p>
       Say the analysis job calls out to a model provider, and that provider gets
-      slow or starts rate-limiting me. Now those jobs pile up and hang onto
-      workers while they wait. Insight generation is sitting in the same queue
+      slow or starts rate-limiting those calls. Now those jobs pile up and hang
+      onto workers while they wait. Insight generation is sitting in the same queue
       behind them. It has nothing to do with the model being slow, but it's stuck
       anyway, because every worker is busy waiting on analysis. One slow
       dependency, and a completely unrelated feature stops working. That's the

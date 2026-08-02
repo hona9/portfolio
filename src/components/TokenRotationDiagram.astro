@@ -1,6 +1,6 @@
 ---
 import '../styles/diagram.css'
-// Diagram 2 — Refresh-token rotation with replay (reuse) detection.
+// Diagram 2: Refresh-token rotation with replay (reuse) detection.
 // Grounded in Nura's RefreshTokenUseCase: refresh tokens rotate on every use;
 // a token already marked `rotatedAt` presented again => reuse detected =>
 // revokeAllForUser('suspicious'). Access tokens are 15-min JWTs with an
@@ -127,7 +127,7 @@ const id = 'd-token'
   .rt.alert .rt-box { stroke: var(--ember); }
   .rt.alert .rt-name, .rt.alert .rt-sub { fill: var(--ember); }
 
-  /* revoke state — the one moment of color */
+  /* revoke state, the one moment of color */
   .rt.rev { opacity: 1; }
   .rt.rev .rt-box { stroke: var(--ember); fill: var(--ember-12); }
   .rt.rev .rt-name, .rt.rev .rt-sub { fill: var(--ember); }

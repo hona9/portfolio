@@ -1,6 +1,6 @@
 ---
 import '../styles/diagram.css'
-// Diagram 1 — Two-queue job isolation with recovery.
+// Diagram 1: Two-queue job isolation with recovery.
 // Grounded in Nura's sessionAnalysisWorker: session-analysis and
 // insight-generation are separate BullMQ queues; a recovery-scheduler
 // re-enqueues jobs left stalled (pending / failed / stuck-processing).
@@ -123,7 +123,7 @@ const id = 'd-queue'
   [data-phase='reflow'] .workerA,
   [data-phase='done'] .workerA, [data-phase='done'] .workerB { stroke: var(--ink); }
 
-  /* lane B stays inked once it has run — isolation: unaffected by A */
+  /* lane B stays inked once it has run. isolation: unaffected by A */
   [data-phase='stall'] .laneB,
   [data-phase='sweep'] .laneB,
   [data-phase='recover'] .laneB { stroke: var(--ink); }
@@ -131,7 +131,7 @@ const id = 'd-queue'
   [data-phase='sweep'] .workerB,
   [data-phase='recover'] .workerB { stroke: var(--ink); }
 
-  /* THE failure beat — lane A goes to Ember (the only color on the site) */
+  /* THE failure beat. lane A goes to Ember (the only color on the site) */
   [data-phase='stall'] .laneA,
   [data-phase='sweep'] .laneA {
     stroke: var(--ember);

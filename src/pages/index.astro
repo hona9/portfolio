@@ -2,19 +2,21 @@
 import Base from '../layouts/Base.astro'
 ---
 
-<Base title="Bishal Hona">
+<Base title="Bishal Hona" fit>
   <section class="hero shell">
-    <p class="label hero__kicker">Infrastructure for LLM systems</p>
+    <p class="label hero__kicker">Backend engineering for AI products</p>
 
     <h1 class="serif hero__title">
       Backend that stays calm<br />when things break.
     </h1>
 
     <p class="hero__lede measure">
-      I'm Bishal Hona, a backend engineer. I build the parts of AI products that
-      live between the model and the person using it. The background jobs, the
-      memory that has to survive across sessions, the streaming, the auth. The
-      stuff that's invisible when it works.
+      I'm Bishal Hona, a product-minded backend engineer. I build the systems
+      behind AI products, and I've gone deep on the infrastructure right under
+      the AI features themselves. The background jobs, the memory that survives
+      across sessions, the streaming, the auth. That's the layer where a lot of
+      AI products quietly succeed or fail, so it's the one I've spent the most
+      time getting right.
     </p>
 
     <p class="hero__ai serif">
@@ -30,28 +32,6 @@ import Base from '../layouts/Base.astro'
       <a class="cta cta--ghost" href="/writing">Read the writing</a>
     </div>
   </section>
-
-  <section class="shell focus">
-    <hr class="hr" />
-    <dl class="focus__grid">
-      <div class="focus__item">
-        <dt class="label">01 · Isolated queues</dt>
-        <dd>I run the background AI jobs in separate queues, so if one kind of task breaks it can't drag the rest down with it. And if a job gets stuck partway, a recovery process picks it back up on its own instead of letting it disappear.</dd>
-      </div>
-      <div class="focus__item">
-        <dt class="label">02 · Memory that lasts</dt>
-        <dd>I build memory that carries from one session to the next. I keep a tight cap on how much of it goes to the model at once, and I record which context produced a given response so I can go back and check.</dd>
-      </div>
-      <div class="focus__item">
-        <dt class="label">03 · Streaming responses</dt>
-        <dd>Responses stream in as the model writes them, so nobody sits watching a blank screen while they wait for the whole answer to land.</dd>
-      </div>
-      <div class="focus__item">
-        <dt class="label">04 · Session security</dt>
-        <dd>Sessions rotate on their own. If a stolen session token ever gets reused, I log every one of that user's sessions out right away.</dd>
-      </div>
-    </dl>
-  </section>
 </Base>
 
 <style>
@@ -62,7 +42,7 @@ import Base from '../layouts/Base.astro'
   .hero__kicker { margin-bottom: 1.6rem; }
   .hero__title {
     font-size: var(--step-4);
-    line-height: 1.02;
+    line-height: 1.12;
     letter-spacing: -0.02em;
     max-width: 18ch;
   }
@@ -115,18 +95,55 @@ import Base from '../layouts/Base.astro'
   }
   .cta--ghost:hover { color: var(--ink); border-color: var(--graphite); }
 
-  .focus { padding-top: clamp(3rem, 2rem + 4vw, 5rem); }
-  .focus__grid {
-    margin-top: clamp(1.6rem, 1rem + 2vw, 2.6rem);
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: clamp(1.5rem, 1rem + 3vw, 3.5rem);
-  }
-  .focus__item dt { margin-bottom: 0.7rem; color: var(--ink); }
-  .focus__item dd { color: var(--graphite); font-size: var(--step-0); line-height: 1.55; }
-
   @media (max-width: 46rem) {
-    .focus__grid { grid-template-columns: 1fr; gap: 1.8rem; }
     .hero__title { max-width: none; }
+  }
+
+  /* ------------------------------------------------------------------------
+     Home-only: the whole page lives in exactly one viewport, no scroll.
+     100dvh accounts for mobile browser chrome. Type and spacing are sized in
+     dvh so the hero shrinks to fit short viewports (small laptops, phones in
+     landscape) instead of overflowing the fixed height. Content is never
+     removed to fit; only type and rhythm compress.
+     ------------------------------------------------------------------------ */
+  :global(body.fit) {
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  :global(body.fit main) {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  :global(body.fit .nav) { padding-block: clamp(0.55rem, 1.6dvh, 1.9rem); }
+  :global(body.fit .foot) {
+    margin-top: 0;
+    padding-block: clamp(0.6rem, 1.8dvh, 3.5rem);
+  }
+
+  :global(body.fit) .hero {
+    padding-top: clamp(0.5rem, 2dvh, 3rem);
+    padding-bottom: clamp(0.5rem, 2dvh, 3rem);
+  }
+  :global(body.fit) .hero__kicker { margin-bottom: clamp(0.5rem, 1.8dvh, 1.6rem); }
+  :global(body.fit) .hero__title {
+    font-size: clamp(1.7rem, 7.2dvh, var(--step-4));
+  }
+  :global(body.fit) .hero__lede {
+    margin-top: clamp(0.5rem, 2.2dvh, 2.4rem);
+    font-size: clamp(0.82rem, 2.4dvh, var(--step-1));
+    line-height: 1.4;
+  }
+  :global(body.fit) .hero__ai {
+    margin-top: clamp(0.5rem, 2.2dvh, 2.8rem);
+    font-size: clamp(0.82rem, 2.2dvh, var(--step-1));
+    line-height: 1.38;
+  }
+  :global(body.fit) .hero__actions {
+    margin-top: clamp(0.8rem, 2.6dvh, 3rem);
   }
 </style>

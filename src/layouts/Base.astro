@@ -9,10 +9,13 @@ import Footer from '../components/Footer.astro'
 interface Props {
   title: string
   description?: string
+  /** Home page only: lock the whole page into one non-scrolling viewport. */
+  fit?: boolean
 }
 const {
   title,
-  description = 'Bishal Hona is a backend engineer who builds the infrastructure behind AI products: background agent jobs, memory that lasts across sessions, streaming, and auth.',
+  description = 'Bishal Hona is a product-minded backend engineer who has gone deep on the infrastructure behind AI products: background agent jobs, memory that lasts across sessions, streaming, and auth.',
+  fit = false,
 } = Astro.props
 const fullTitle = title === 'Bishal Hona' ? title : `${title} · Bishal Hona`
 ---
@@ -35,7 +38,7 @@ const fullTitle = title === 'Bishal Hona' ? title : `${title} · Bishal Hona`
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   </head>
-  <body>
+  <body class={fit ? 'fit' : undefined}>
     <a href="#main" class="skip">Skip to content</a>
     <Nav />
     <main id="main">

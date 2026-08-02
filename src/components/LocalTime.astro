@@ -1,0 +1,38 @@
+---
+// Quiet aside: the current local time where Bishal is based (Kathmandu, UTC+5:45).
+// Rendered with a build-time value so there's no empty flash, then corrected on
+// load and refreshed once a minute client-side. No seconds, no ticking effect.
+const fmt = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Asia/Kathmandu',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+})
+const initial = fmt.format(new Date())
+---
+
+<p class="localtime label">
+  <time data-localtime>{initial}</time> in Kathmandu
+</p>
+
+<script>
+  const el = document.querySelector('[data-localtime]')
+  if (el) {
+    const fmt = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Kathmandu',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    })
+    const tick = () => (el.textContent = fmt.format(new Date()))
+    tick()
+    setInterval(tick, 60_000)
+  }
+</script>
+
+<style>
+  .localtime {
+    color: var(--graphite);
+    white-space: nowrap;
+  }
+</style>
