@@ -120,7 +120,7 @@ button { font: inherit; color: inherit; }
 .display {
   font-family: var(--font-pixel);
   font-weight: 400;
-  line-height: 1.25; /* roomy enough that descenders (y, g, p) never clip */
+  line-height: 1.5; /* Departure Mono's descenders (y, g, p, q, j) get clipped by the next line below ~1.5 */
   letter-spacing: 0.01em;
   /* pixel glyphs are wide; let long headings break instead of overflowing */
   overflow-wrap: break-word;

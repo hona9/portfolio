@@ -101,7 +101,7 @@ const posts = [
   .w-head { padding-top: clamp(2rem, 1.5rem + 3vw, 4rem); }
   .w-title {
     font-size: var(--step-3);
-    line-height: 1.22;
+    line-height: 1.5;
     letter-spacing: 0.01em;
     margin: 0.7rem 0 0;
   }
@@ -207,7 +207,10 @@ const posts = [
   .entry:hover .g-dash,
   .entry:hover .g-strike { stroke: var(--invert-rule); }
 
-  .w-foot { margin-top: clamp(2.5rem, 1.5rem + 3vw, 4rem); }
+  .w-foot {
+    margin-top: clamp(2.5rem, 1.5rem + 3vw, 4rem);
+    padding-bottom: clamp(2.5rem, 1.5rem + 3vw, 4rem);
+  }
   .w-journal {
     margin-top: 1.4rem;
     color: var(--graphite);
