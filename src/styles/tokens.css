@@ -190,6 +190,12 @@ a { color: inherit; text-decoration: none; }
 
 ::selection { background: var(--ink); color: var(--paper); }
 
+/* shared terminal-style block cursor, used by the hero typewriter and the
+   nav hover-typing effect */
+@keyframes cursor-blink {
+  50% { opacity: 0; }
+}
+
 /* =========================================================================
    motion policy: composure. nothing moves on its own; and if the visitor
    asks for less, the diagrams resolve instantly to their meaningful frame.

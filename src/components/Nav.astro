@@ -25,7 +25,11 @@ const isActive = (href: string) =>
               aria-current={isActive(l.href) ? 'page' : undefined}
             >
               <span class={`nav__key nav__key--${l.tone}`} aria-hidden="true">{l.key}</span>
-              <span class="nav__label label" data-scramble data-text={l.label}>{l.label}</span>
+              <span class="nav__label label" data-scramble data-text={l.label}
+                ><span class="nav__label-done">{l.label}</span
+                ><span class="nav__caret" aria-hidden="true"></span
+                ><span class="nav__label-rest"></span
+              ></span>
             </a>
           </li>
         ))}
@@ -94,6 +98,27 @@ const isActive = (href: string) =>
     font-variant-ligatures: none;
   }
   .nav__link:hover .nav__label { color: var(--ink); }
+  .nav__label-done, .nav__label-rest { color: inherit; }
+
+  /* terminal-style block cursor: sits between the typed prefix and the still
+     -scrambling remainder, so it walks left to right as the label resolves.
+     Its box (width + margin) is reserved at all times and only its opacity
+     changes on hover, so hovering never resizes the label — nothing in the
+     nav shifts when the cursor appears. */
+  .nav__caret {
+    display: inline-block;
+    width: 0.4em;
+    height: 0.75em;
+    margin: 0 0.15em;
+    background: currentColor;
+    vertical-align: -0.05em;
+    opacity: 0;
+    transition: opacity 100ms var(--ease);
+  }
+  .nav__link.is-typing .nav__caret {
+    opacity: 1;
+    animation: cursor-blink 0.9s step-end infinite;
+  }
   .nav__link[aria-current='page'] .nav__label { color: var(--ink); }
   .nav__link[aria-current='page'] .nav__label::after {
     content: '';
@@ -116,12 +141,19 @@ const isActive = (href: string) =>
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   function scramble(el: HTMLElement) {
-    const text = el.dataset.text || el.textContent || ''
-    if (reduce) { el.textContent = text; return }
+    const text = el.dataset.text || ''
+    const link = el.closest('a')
+    const doneEl = el.querySelector<HTMLElement>('.nav__label-done')
+    const restEl = el.querySelector<HTMLElement>('.nav__label-rest')
+    if (!doneEl || !restEl) return
+    if (reduce) { doneEl.textContent = text; restEl.textContent = ''; return }
     // guard against overlapping runs on rapid re-hover
     if ((el as any)._raf) cancelAnimationFrame((el as any)._raf)
+    link?.classList.add('is-typing')
     const start = performance.now()
-    const dur = 90 + text.length * 45
+    // slow, deliberate — reads like a terminal typing the label in, not a
+    // quick glitch
+    const dur = 160 + text.length * 90
     const tick = (now: number) => {
       const p = Math.min(1, (now - start) / dur)
       const revealed = Math.floor(p * text.length)
@@ -131,9 +163,16 @@ const isActive = (href: string) =>
         if (i < revealed || c === ' ') out += c
         else out += GLYPHS[(Math.random() * GLYPHS.length) | 0]
       }
-      el.textContent = out
+      // the caret sits between these two, so it walks forward with `revealed`
+      doneEl.textContent = out.slice(0, revealed)
+      restEl.textContent = out.slice(revealed)
       if (p < 1) (el as any)._raf = requestAnimationFrame(tick)
-      else { el.textContent = text; (el as any)._raf = null }
+      else {
+        doneEl.textContent = text
+        restEl.textContent = ''
+        ;(el as any)._raf = null
+        link?.classList.remove('is-typing')
+      }
     }
     ;(el as any)._raf = requestAnimationFrame(tick)
   }

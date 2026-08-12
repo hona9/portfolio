@@ -9,25 +9,80 @@ const notes = [
 
 <Base title="Bishal Hona">
   <section class="hero shell">
-    <p class="label hero__kicker">Backend engineering for AI products</p>
+    <p class="label hero__kicker">Backend engineer</p>
 
-    <h1 class="display hero__title">
-      Hi, I'm<br />Bishal Hona.
-    </h1>
+    <h1 class="display hero__title"><span class="hero__line"><span class="hero__typed-done" data-text="Hi, I'm">Hi, I'm</span><span class="hero__caret" aria-hidden="true"></span><span class="hero__typed-rest"></span></span><br /><span class="hero__line"><span class="hero__typed-done" data-text="Bishal Hona.">Bishal Hona.</span><span class="hero__caret" aria-hidden="true"></span><span class="hero__typed-rest"></span></span></h1>
+    <script is:inline>
+      (function () {
+        // same decode effect as the nav hover, run once on load instead of
+        // on hover: glyphs scramble and resolve left to right, line by line.
+        var GLYPHS = '!<>-_\\/[]{}=+*^?#$%01'
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        var lines = document.querySelectorAll('.hero__line')
+        if (!lines.length) return
+
+        var data = []
+        lines.forEach(function (line) {
+          var doneEl = line.querySelector('.hero__typed-done')
+          var restEl = line.querySelector('.hero__typed-rest')
+          data.push({ line: line, doneEl: doneEl, restEl: restEl, text: doneEl.getAttribute('data-text') || '' })
+          doneEl.textContent = '' // clear the no-JS fallback text before decoding it back in
+          restEl.textContent = ''
+        })
+
+        if (reduce) {
+          data.forEach(function (d) { d.doneEl.textContent = d.text })
+          return
+        }
+
+        var scrambleLine = function (li) {
+          if (li >= data.length) return
+          var d = data[li]
+          d.line.classList.add('is-typing')
+          var start = null
+          var dur = 160 + d.text.length * 90
+          var tick = function (now) {
+            if (start === null) start = now
+            var p = Math.min(1, (now - start) / dur)
+            var revealed = Math.floor(p * d.text.length)
+            var out = ''
+            for (var i = 0; i < d.text.length; i++) {
+              var c = d.text[i]
+              out += (i < revealed || c === ' ') ? c : GLYPHS[(Math.random() * GLYPHS.length) | 0]
+            }
+            d.doneEl.textContent = out.slice(0, revealed)
+            d.restEl.textContent = out.slice(revealed)
+            if (p < 1) {
+              requestAnimationFrame(tick)
+            } else {
+              d.doneEl.textContent = d.text
+              d.restEl.textContent = ''
+              d.line.classList.remove('is-typing')
+              setTimeout(function () { scrambleLine(li + 1) }, 150)
+            }
+          }
+          requestAnimationFrame(tick)
+        }
+
+        setTimeout(function () { scrambleLine(0) }, 200)
+      })()
+    </script>
 
     <p class="hero__lede measure">
-      I'm a product-minded backend engineer, and I build the systems behind AI
-      products. I've gone deep on the infrastructure right under the AI features
-      themselves. The background jobs, the memory that survives across sessions,
-      the streaming, the auth. That's the layer where a lot of AI products
-      quietly succeed or fail, so it's the one I've spent the most time getting
+      I'm a backend engineer who thinks about the product and the business it
+      sits inside, not just the code. Background jobs that survive their own
+      failures. Auth that holds up when someone tries to break it, not just
+      when everything goes right. Data that stays consistent when three things
+      happen out of order. That's the layer most of a product's reliability
+      actually comes from, and it's the one I've spent the most time getting
       right.
     </p>
 
     <p class="hero__ai">
       <span class="label hero__ai-tag">Thesis</span>
-      Plenty of AI products look great in a demo. I build the part that keeps
-      them working once real people are using them.
+      Plenty of products look impressive in a demo. I build the part that
+      keeps them standing once real users, real load, and the occasional bad
+      actor show up.
     </p>
 
     <div class="hero__actions">
@@ -79,8 +134,8 @@ const notes = [
       <p class="label band__kicker">03 / contact</p>
       <h2 class="display band__title">Let's talk</h2>
       <p class="band__lede measure">
-        If you're building an AI product and the hard part lives underneath the
-        model, that's usually a good first conversation.
+        If the hard part of what you're building lives in the backend,
+        that's usually a good first conversation.
       </p>
       <a class="band__cta" href="/contact">
         Get in touch <span aria-hidden="true">→</span>
@@ -102,6 +157,27 @@ const notes = [
     letter-spacing: 0.005em;
     text-transform: uppercase;
     max-width: 20ch;
+  }
+  /* both lines are always in the DOM (the <br/> between them is never
+     conditional) so the title reserves its full two-line height on first
+     paint — nothing below it shifts as the text decodes in. */
+  .hero__line { display: inline; }
+  .hero__typed-done, .hero__typed-rest { color: inherit; }
+  /* the caret's box is reserved at all times and only its opacity changes,
+     same as the nav hover cursor — so decoding never resizes the heading. */
+  .hero__caret {
+    display: inline-block;
+    width: 0.48em;
+    height: 0.82em;
+    margin: 0 0.08em;
+    background: currentColor;
+    vertical-align: -0.08em;
+    opacity: 0;
+    transition: opacity 100ms var(--ease);
+  }
+  .hero__line.is-typing .hero__caret {
+    opacity: 1;
+    animation: cursor-blink 1s step-end infinite;
   }
   .hero__lede {
     margin-top: clamp(1.5rem, 1rem + 2vw, 2.4rem);
