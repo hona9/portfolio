@@ -16,7 +16,7 @@ const { title, n, read, system, standfirst, description } = Astro.props
   <article class="art">
     <header class="art__head shell">
       <p class="label"><a href="/writing" class="art__back">Writing</a> · Field note {n}</p>
-      <h1 class="serif art__title measure">{title}</h1>
+      <h1 class="display art__title measure">{title}</h1>
       <p class="art__standfirst measure">{standfirst}</p>
       <div class="art__meta">
         <span class="label">{read} read</span>
@@ -37,9 +37,9 @@ const { title, n, read, system, standfirst, description } = Astro.props
   .art__back { color: var(--graphite); transition: color 200ms var(--ease); }
   .art__back:hover { color: var(--ink); }
   .art__title {
-    font-size: var(--step-3);
-    line-height: 1.08;
-    letter-spacing: -0.02em;
+    font-size: var(--step-2);
+    line-height: 1.25;
+    letter-spacing: 0.01em;
     margin: 0.7rem 0 0;
   }
   .art__standfirst {
@@ -53,7 +53,7 @@ const { title, n, read, system, standfirst, description } = Astro.props
     display: flex;
     gap: 1.6rem;
   }
-  .art__sys { color: var(--mist); }
+  .art__sys { color: var(--mute); }
 
   .art__body { padding-top: clamp(2rem, 1.5rem + 2vw, 3rem); }
 
@@ -61,23 +61,23 @@ const { title, n, read, system, standfirst, description } = Astro.props
   .art__body :global(.prose) { max-width: var(--measure); }
   .art__body :global(.prose > * + *) { margin-top: 1.3rem; }
   .art__body :global(.prose h2) {
-    font-family: var(--font-serif);
-    font-weight: 400;
+    font-family: var(--font-mono);
+    font-weight: 500;
     font-size: var(--step-2);
-    line-height: 1.15;
-    letter-spacing: -0.015em;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
     margin-top: 2.6rem;
   }
-  .art__body :global(.prose p) { color: var(--graphite); line-height: 1.68; }
+  .art__body :global(.prose p) { font-family: var(--font-sans); color: var(--graphite); line-height: 1.7; }
   .art__body :global(.prose b),
-  .art__body :global(.prose strong) { color: var(--ink); font-weight: 500; }
+  .art__body :global(.prose strong) { color: var(--ink); font-weight: 600; }
   .art__body :global(.prose .draft) {
     font-family: var(--font-mono);
     font-size: var(--step--1);
     color: var(--graphite);
     background: var(--panel);
-    border: 1px solid var(--mist);
-    border-radius: 4px;
+    border: 1px solid var(--ink);
+    border-radius: var(--radius);
     padding: 1rem 1.2rem;
     line-height: 1.55;
   }

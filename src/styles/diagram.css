@@ -22,8 +22,8 @@
 .diagram__stage {
   position: relative;
   background: var(--panel);
-  border: 1px solid var(--mist);
-  border-radius: 4px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
   overflow: hidden;
 }
 .diagram__svg { width: 100%; height: auto; display: block; }
@@ -35,7 +35,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.75rem clamp(0.9rem, 0.6rem + 1vw, 1.4rem);
-  border-top: 1px solid var(--mist);
+  border-top: 1px solid var(--ink);
   background: color-mix(in srgb, var(--panel) 60%, var(--paper));
 }
 .diagram__status {
@@ -65,8 +65,8 @@
   text-transform: uppercase;
   color: var(--graphite);
   background: transparent;
-  border: 1px solid var(--mist);
-  border-radius: 3px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
   padding: 0.5em 0.95em;
   cursor: pointer;
   transition: color 180ms var(--ease), border-color 180ms var(--ease), background 180ms var(--ease);
@@ -112,7 +112,7 @@
 .d-pkt {
   transition: transform var(--move) var(--ease), opacity 300ms var(--ease);
 }
-.d-pkt rect { fill: var(--ink); rx: 3; }
+.d-pkt rect { fill: var(--ink); rx: 0; }
 .d-pkt text { font-family: var(--font-mono); font-size: 9.5px; fill: var(--paper); letter-spacing: 0.03em; }
 
 /* a small state chip rendered in SVG */

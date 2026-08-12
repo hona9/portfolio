@@ -1,45 +1,80 @@
+/* Departure Mono — thin pixel display face, a close free match to dottxt's
+   neueBit. Self-hosted from /public/fonts. Single weight. */
+@font-face {
+  font-family: 'Departure Mono';
+  src: url('/fonts/DepartureMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* =========================================================================
    Bishal Hona design tokens
-   Concept: composure. The page holds still until asked. The only chroma on
-   the whole site is Ember, and it appears only when a diagram shows a
-   failure. Calm has no color.
+   Concept: a structured-output spec sheet. High-contrast black on white,
+   everything framed and monospace, like a machine printing its own manual.
+   A pixel display face carries the headlines; the only chroma is a single
+   rust beat that appears when a diagram shows a failure. Calm has no color.
    ========================================================================= */
 
 :root {
-  /* ---- palette (6 named values) ------------------------------------------ */
-  --paper:    #f1f2f3; /* cool off-white ground, deliberately not cream        */
-  --panel:    #e7e8ea; /* one step down, inset diagram surfaces                */
-  --ink:      #17181b; /* near-black primary type, healthy/active elements     */
-  --graphite: #5b5f66; /* secondary text, mono labels, annotations             */
-  --mist:     #d6d8db; /* hairlines, borders, idle/stalled diagram state       */
-  --ember:    #a33a30; /* THE ONLY CHROMA. diagram failure/revoke beat only.   */
+  /* ---- palette ----------------------------------------------------------- */
+  --paper:    #ffffff; /* the page ground, pure and bright                    */
+  --panel:    #f2f2f2; /* inset spec-sheet fill                               */
+  --panel-2:  #e8e8e8; /* one step down                                       */
+  --ink:      #000000; /* pure black: primary type, borders, frames           */
+  --graphite: #4c4c4c; /* secondary text                                      */
+  --mute:     #7f7f7f; /* tertiary / metadata                                 */
+  --rule:     #d6d6d6; /* hairline dividers                                   */
 
-  /* derived, still monochrome */
+  /* inverted surface: black panels with bright type */
+  --invert-bg: #000000;
+  --invert-fg: #ffffff;
+  --invert-mute: #bcbcbc;
+  --invert-rule: #3a3a3a;
+
+  /* the single chroma beat + muted spec swatches (used sparingly) */
+  --rust: #e35a26; /* THE alert. diagram failure/revoke beat only.            */
+  --pink: #ddb8ca;
+  --sage: #a6b4a3;
+  --azure: #7f9acf;
+  --gold: #bd932f;
+
+  /* derived */
   --ink-08:  color-mix(in srgb, var(--ink) 8%, transparent);
   --ink-04:  color-mix(in srgb, var(--ink) 4%, transparent);
-  --ember-12: color-mix(in srgb, var(--ember) 12%, transparent);
+  --rust-12: color-mix(in srgb, var(--rust) 12%, transparent);
+
+  /* legacy alias so diagram markup that still says --ember/--mist keeps working */
+  --ember: var(--rust);
+  --mist: var(--rule);
 
   /* ---- type ---------------------------------------------------------------
-     Two typefaces, each a voice:
-       serif (Newsreader)   = human judgment, used big and rarely
-       mono/sans (Geist)    = the machine, everything systemic              */
-  --font-serif: 'Newsreader Variable', 'Newsreader', Georgia, 'Times New Roman', serif;
-  --font-sans:  'Geist Variable', 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+     Three voices:
+       pixel (Pixelify Sans) = the display headline, the machine's own type
+       mono  (Geist Mono)    = the primary UI voice: nav, labels, meta, leads
+       sans  (Geist)         = long-form reading only (articles, about)      */
+  --font-pixel: 'Departure Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   --font-mono:  'Geist Mono Variable', 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-sans:  'Geist Variable', 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  /* fluid type scale */
-  --step--1: clamp(0.78rem, 0.76rem + 0.10vw, 0.84rem);
-  --step-0:  clamp(0.98rem, 0.95rem + 0.15vw, 1.06rem);
-  --step-1:  clamp(1.20rem, 1.12rem + 0.40vw, 1.45rem);
-  --step-2:  clamp(1.55rem, 1.35rem + 1.00vw, 2.20rem);
-  --step-3:  clamp(2.10rem, 1.70rem + 2.00vw, 3.40rem);
-  --step-4:  clamp(2.80rem, 2.10rem + 3.60vw, 5.20rem);
+  /* fluid type scale
+     Body and lede are deliberately small so the pixel headlines dominate;
+     mono glyphs read visually larger than their point size, so paragraph
+     sizes sit lower than a sans scale would. */
+  --step--1: clamp(0.72rem, 0.70rem + 0.08vw, 0.77rem); /* labels, meta       */
+  --step-0:  clamp(0.82rem, 0.80rem + 0.12vw, 0.90rem); /* body copy          */
+  --step-1:  clamp(0.92rem, 0.89rem + 0.16vw, 1.04rem); /* lede / standfirst  */
+  --step-2:  clamp(1.35rem, 1.15rem + 0.9vw, 1.95rem);  /* section headings   */
+  --step-3:  clamp(1.7rem, 1.35rem + 1.7vw, 2.85rem);   /* page titles        */
+  --step-4:  clamp(2.2rem, 1.6rem + 3.1vw, 4.4rem);     /* hero display       */
 
   /* ---- space / rhythm ---------------------------------------------------- */
-  --measure: 66ch;          /* reading measure                               */
+  --measure: 66ch;
   --gutter: clamp(1.25rem, 0.9rem + 2.5vw, 3rem);
   --shell:  min(1120px, 100% - 2 * var(--gutter));
   --flow:   clamp(1rem, 0.9rem + 0.6vw, 1.4rem);
+
+  --radius: 0px; /* sharp corners everywhere; this is a spec sheet */
 
   --dur-slow: 900ms;
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -61,18 +96,17 @@ body {
   flex-direction: column;
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-sans);
+  font-family: var(--font-mono);
   font-size: var(--step-0);
   line-height: 1.6;
   font-weight: 400;
-  letter-spacing: -0.006em;
+  letter-spacing: 0;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
 }
 
-/* sticky footer: main grows so the footer anchors to the bottom on short
-   pages (e.g. Contact) instead of floating mid-viewport. The fit home page
-   overrides main's flex, so this doesn't affect it. */
+html { overflow-x: hidden; }
 main { flex: 1 0 auto; }
 
 img, svg, video { display: block; max-width: 100%; }
@@ -81,14 +115,26 @@ button { font: inherit; color: inherit; }
 /* =========================================================================
    type roles
    ========================================================================= */
-.serif { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.012em; }
-.mono  { font-family: var(--font-mono); }
 
-/* mono label, the machine voice. used for nav, kickers, metadata, states. */
+/* the pixel display voice: headlines and the wordmark */
+.display {
+  font-family: var(--font-pixel);
+  font-weight: 400;
+  line-height: 1.25; /* roomy enough that descenders (y, g, p) never clip */
+  letter-spacing: 0.01em;
+  /* pixel glyphs are wide; let long headings break instead of overflowing */
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.mono { font-family: var(--font-mono); }
+.sans { font-family: var(--font-sans); }
+
+/* mono label, the machine's captions: nav, kickers, metadata, states. */
 .label {
   font-family: var(--font-mono);
   font-size: var(--step--1);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--graphite);
   font-weight: 500;
@@ -103,15 +149,28 @@ a { color: inherit; text-decoration: none; }
 .measure { max-width: var(--measure); }
 .flow > * + * { margin-top: var(--flow); }
 
-.hr { height: 1px; background: var(--mist); border: 0; }
+.hr { height: 1px; background: var(--rule); border: 0; }
+
+/* framed spec-sheet panel */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+}
+/* inverted black surface */
+.invert {
+  background: var(--invert-bg);
+  color: var(--invert-fg);
+}
+.invert .label { color: var(--invert-mute); }
 
 /* =========================================================================
-   focus: visible, monochrome, never removed
+   focus: visible, high-contrast, never removed
    ========================================================================= */
 :where(a, button, [tabindex]):focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 3px;
-  border-radius: 1px;
+  border-radius: 0;
 }
 
 /* skip link */
@@ -132,7 +191,7 @@ a { color: inherit; text-decoration: none; }
 ::selection { background: var(--ink); color: var(--paper); }
 
 /* =========================================================================
-   motion policy is composure. nothing moves on its own; and if the visitor
+   motion policy: composure. nothing moves on its own; and if the visitor
    asks for less, the diagrams resolve instantly to their meaningful frame.
    ========================================================================= */
 @media (prefers-reduced-motion: reduce) {

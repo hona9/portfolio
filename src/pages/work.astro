@@ -13,8 +13,8 @@ const meta = [
 <Base title="Work · Nura" description="How I built Nura's backend: two isolated job queues with a recovery pass, and rotating auth tokens that catch a reused token and log the user out everywhere.">
   <article class="case">
     <header class="case__head shell">
-      <p class="label">Case study · 01</p>
-      <h1 class="serif case__title">Nura</h1>
+      <p class="label">Case study / 01</p>
+      <h1 class="display case__title">Nura</h1>
       <p class="case__standfirst measure">
         Nura is an AI journaling app, built on background agent jobs. The app
         itself is calm and almost wordless, but there's a lot going on
@@ -23,22 +23,21 @@ const meta = [
         decide a session can still be trusted. Both are running below.
       </p>
 
-      <dl class="case__meta">
+      <dl class="case__meta panel">
         {meta.map((m) => (
           <div class="case__meta-item">
             <dt class="label">{m.k}</dt>
-            <dd>{m.v}</dd>
+            <dd class="mono">{m.v}</dd>
           </div>
         ))}
       </dl>
     </header>
 
-    <div class="shell"><hr class="hr" /></div>
-
     <!-- Diagram 1 -->
     <section class="case__section shell">
       <div class="case__lead measure">
-        <h2 class="serif case__h2">One stuck job shouldn't freeze the whole app</h2>
+        <p class="label case__index">Mechanism 01 / queue isolation</p>
+        <h2 class="case__h2">One stuck job shouldn't freeze the whole app</h2>
         <p>
           When a session closes, two background jobs fire. One looks back over
           what happened in the session; the other generates an insight, but only
@@ -47,7 +46,7 @@ const meta = [
           on its own queue instead of starving insight generation, and a recovery
           pass comes back around for anything left stuck. For the user, one
           broken pipeline never freezes the rest of the app, and a late insight
-          beats one that quietly never arrives. The diagram below runs the real
+          beats one that never comes. The diagram below runs the real
           thing.
         </p>
       </div>
@@ -57,7 +56,8 @@ const meta = [
     <!-- Diagram 2 -->
     <section class="case__section shell">
       <div class="case__lead measure">
-        <h2 class="serif case__h2">A stolen session shouldn't stay alive</h2>
+        <p class="label case__index">Mechanism 02 / token rotation</p>
+        <h2 class="case__h2">A stolen session shouldn't stay alive</h2>
         <p>
           Access uses a short-lived token. The long-lived one <b>rotates every
           time it's used</b>, and that rotation is what lets me catch theft. If a
@@ -65,34 +65,33 @@ const meta = [
           and one of them shouldn't be. So I revoke every session for that user
           at once, not just the suspicious request. Killing only the one request
           would leave the attacker a working token somewhere else. For the user,
-          a leaked token can't quietly hold a door open into their journal. The
+          a leaked token can't hold a door open into their journal. The
           diagram catches a reuse as it happens.
         </p>
       </div>
       <TokenRotationDiagram />
     </section>
 
-    <div class="shell"><hr class="hr" /></div>
-
     <!-- system at a glance -->
     <section class="case__section shell">
       <div class="case__lead measure">
-        <h2 class="serif case__h2">The rest of the system, briefly</h2>
+        <p class="label case__index">03 / the rest of the system</p>
+        <h2 class="case__h2">The rest of the system, briefly</h2>
       </div>
       <div class="case__facts">
-        <div class="case__fact">
+        <div class="case__fact panel">
           <p class="label">Provider abstraction</p>
           <p>Claude runs as the main model, with OpenRouter as a fallback and a mock version for tests. Switching models means changing one environment variable, and the code stays untouched. If the main provider has a bad day, the app keeps answering.</p>
         </div>
-        <div class="case__fact">
+        <div class="case__fact panel">
           <p class="label">Context assembly</p>
-          <p>Each user's context comes from their strongest patterns plus their most recent session summaries, all kept under a 4k-token budget. Every request logs what went into it. The model stays grounded in the user's real history without the cost quietly creeping up.</p>
+          <p>Each user's context comes from their strongest patterns plus their most recent session summaries, all kept under a 4k-token budget. Every request logs what went into it. The model stays grounded in the user's real history without the cost creeping up.</p>
         </div>
-        <div class="case__fact">
+        <div class="case__fact panel">
           <p class="label">Clean architecture</p>
           <p>The domain, application, infrastructure, and presentation layers stay separate, wired together with constructor injection. That keeps every use case testable without spinning up a database or an HTTP server.</p>
         </div>
-        <div class="case__fact">
+        <div class="case__fact panel">
           <p class="label">Server-driven UI</p>
           <p>The app pulls its feature flags, config, and copy from a bootstrap endpoint when it starts. So rolling out a feature or fixing a bit of wording doesn't need an App Store update.</p>
         </div>
@@ -112,7 +111,6 @@ const meta = [
     font-size: var(--step-4);
     line-height: 1;
     margin: 0.6rem 0 0;
-    letter-spacing: -0.02em;
   }
   .case__standfirst {
     margin-top: clamp(1.2rem, 0.8rem + 2vw, 2rem);
@@ -124,43 +122,57 @@ const meta = [
     margin-top: clamp(1.6rem, 1rem + 2vw, 2.6rem);
     display: flex;
     flex-wrap: wrap;
-    gap: 1.2rem 2.6rem;
+    gap: 0;
   }
-  .case__meta-item dt { margin-bottom: 0.35rem; }
-  .case__meta-item dd { font-family: var(--font-mono); font-size: var(--step--1); color: var(--ink); }
+  .case__meta-item {
+    flex: 1 1 14rem;
+    padding: 1rem 1.2rem;
+    border-right: 1px solid var(--ink);
+  }
+  .case__meta-item:last-child { border-right: 0; }
+  .case__meta-item dt { margin-bottom: 0.45rem; }
+  .case__meta-item dd { font-size: var(--step--1); color: var(--ink); }
 
   .case__section { padding-top: clamp(2.5rem, 1.5rem + 4vw, 4.5rem); }
   .case__lead { margin-bottom: 0.5rem; }
+  .case__index { display: block; margin-bottom: 0.8rem; color: var(--rust); }
   .case__h2 {
+    font-family: var(--font-mono);
+    font-weight: 500;
     font-size: var(--step-2);
-    line-height: 1.1;
-    letter-spacing: -0.015em;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
     margin-bottom: 0.9rem;
   }
-  .case__lead p { color: var(--graphite); font-size: var(--step-0); line-height: 1.6; }
+  .case__lead > p:not(.case__index):not(.case__h2) {
+    color: var(--graphite); font-size: var(--step-0); line-height: 1.6;
+  }
   .case__lead b { color: var(--ink); font-weight: 500; }
 
   .case__facts {
     margin-top: 1.4rem;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: clamp(1.4rem, 1rem + 2vw, 2.6rem);
+    gap: clamp(1rem, 0.7rem + 1vw, 1.4rem);
   }
+  .case__fact { padding: 1.2rem 1.3rem; }
   .case__fact p:first-child { margin-bottom: 0.5rem; }
   .case__fact p:last-child { color: var(--graphite); font-size: var(--step-0); line-height: 1.55; }
 
   .case__note {
     margin-top: clamp(2.5rem, 1.5rem + 3vw, 4rem);
     padding: 1.3rem 1.5rem;
-    background: var(--panel);
-    border: 1px solid var(--mist);
-    border-radius: 4px;
+    background: var(--invert-bg);
+    color: var(--invert-fg);
+    border-radius: var(--radius);
     max-width: 60ch;
   }
-  .case__note p:first-child { margin-bottom: 0.4rem; }
-  .case__note p:last-child { color: var(--graphite); font-size: var(--step--1); line-height: 1.55; }
+  .case__note p:first-child { margin-bottom: 0.4rem; color: var(--rust); }
+  .case__note p:last-child { color: var(--invert-mute); font-size: var(--step--1); line-height: 1.55; }
 
   @media (max-width: 40rem) {
     .case__facts { grid-template-columns: 1fr; }
+    .case__meta-item { flex-basis: 100%; border-right: 0; border-bottom: 1px solid var(--ink); }
+    .case__meta-item:last-child { border-bottom: 0; }
   }
 </style>

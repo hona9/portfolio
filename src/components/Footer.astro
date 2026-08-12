@@ -8,8 +8,8 @@ const year = new Date().getFullYear()
     <p class="label foot__sig">Bishal&nbsp;Hona · backend for AI products</p>
     <LocalTime />
     <ul class="foot__links label">
-      <li><a href="mailto:dev.hona9@gmail.com">Email</a></li>
-      <li><a href="https://www.linkedin.com/in/bishal-hona" rel="me noopener" target="_blank">LinkedIn</a></li>
+      <li><a href="mailto:dev.hona9@gmail.com">Email<span aria-hidden="true"> ↗</span></a></li>
+      <li><a href="https://www.linkedin.com/in/bishal-hona" rel="me noopener" target="_blank">LinkedIn<span aria-hidden="true"> ↗</span></a></li>
     </ul>
     <p class="label foot__year">© {year}</p>
   </div>
@@ -17,19 +17,23 @@ const year = new Date().getFullYear()
 
 <style>
   .foot {
-    margin-top: clamp(5rem, 3rem + 8vw, 9rem);
-    padding-block: clamp(2rem, 1.5rem + 2vw, 3.5rem);
-    border-top: 1px solid var(--mist);
+    margin-top: 0;
+    padding-block: clamp(1.6rem, 1.2rem + 1.4vw, 2.6rem);
+    border-top: 1px solid var(--invert-rule);
+    background: var(--invert-bg);
+    color: var(--invert-fg);
   }
   .foot__inner {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
-    gap: 1rem 2rem;
+    gap: 0.8rem 2rem;
   }
-  .foot__links { list-style: none; display: flex; gap: 1.6rem; padding: 0; }
-  .foot__links a { color: var(--graphite); transition: color 200ms var(--ease); }
-  .foot__links a:hover { color: var(--ink); }
-  .foot__year { color: var(--mist); }
+  .foot .label { color: var(--invert-mute); }
+  .foot__sig { color: var(--invert-fg); }
+  .foot__links { list-style: none; display: flex; gap: 1.4rem; padding: 0; }
+  .foot__links a { color: var(--invert-mute); transition: color 160ms var(--ease); }
+  .foot__links a:hover { color: var(--rust); }
+  .foot__year { color: var(--invert-mute); }
 </style>

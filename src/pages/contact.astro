@@ -10,7 +10,7 @@ const links = [
 <Base title="Contact" description="Get in touch with Bishal Hona about backend and infrastructure work on AI systems.">
   <section class="shell ct">
     <p class="label">Contact</p>
-    <h1 class="serif ct__title measure">
+    <h1 class="display ct__title measure">
       If you're building an AI product and the hard part lives underneath the
       model, let's talk.
     </h1>
@@ -38,9 +38,9 @@ const links = [
 <style>
   .ct { padding-top: clamp(2.5rem, 1.5rem + 4vw, 5rem); }
   .ct__title {
-    font-size: var(--step-3);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    font-size: var(--step-2);
+    line-height: 1.2;
+    letter-spacing: 0.01em;
     margin-top: 0.8rem;
   }
   .ct__note {
@@ -55,16 +55,19 @@ const links = [
     padding: 0;
     margin-top: clamp(2.5rem, 1.5rem + 3vw, 4rem);
     max-width: 40rem;
+    border: 1px solid var(--ink);
   }
   .ct__link-row {
     display: flex;
     align-items: baseline;
     gap: 1.5rem;
-    padding: 1.1rem 0;
-    border-top: 1px solid var(--mist);
+    padding: 1.1rem 1.2rem;
+    border-top: 1px solid var(--ink);
+    transition: background 160ms var(--ease);
   }
-  .ct__link-row:last-child { border-bottom: 1px solid var(--mist); }
-  .ct__k { flex: 0 0 6rem; color: var(--graphite); }
+  .ct__link-row:first-child { border-top: 0; }
+  .ct__link-row:hover { background: var(--panel); }
+  .ct__k { flex: 0 0 6rem; color: var(--rust); }
   .ct__v {
     font-size: var(--step-1);
     color: var(--ink);
@@ -74,7 +77,7 @@ const links = [
     transition: color 200ms var(--ease);
   }
   .ct__arr { transition: transform 220ms var(--ease); color: var(--graphite); }
-  .ct__v:hover .ct__arr { transform: translateX(5px); color: var(--ink); }
+  .ct__v:hover .ct__arr { transform: translateX(5px); color: var(--rust); }
 
   @media (max-width: 34rem) {
     .ct__link-row { flex-direction: column; gap: 0.3rem; }

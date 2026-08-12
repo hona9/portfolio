@@ -12,7 +12,7 @@ const roles = [
 <Base title="About" description="Bishal Hona, a product-minded backend engineer with about three years building Node and TypeScript systems, who has gone deep on the infrastructure behind AI products.">
   <section class="shell ab-head">
     <p class="label">About</p>
-    <h1 class="serif ab-title measure">
+    <h1 class="display ab-title measure">
       I'm a backend engineer. I've gone deep on the layer between a model's API
       and the person waiting on the other end.
     </h1>
@@ -33,15 +33,14 @@ const roles = [
         I care most about the parts of a system you never notice when they're
         working. I keep orchestration, tool calls, and storage cleanly separated,
         and I do it for a practical reason: it lets me think through what happens
-        when something fails before it actually does. I try to build things that
+        when something fails before it does. I try to build things that
         stay calm when they break. And I try to leave enough of a trail that the
         next person can follow why I did what I did.
       </p>
       <p>
         I don't do model training or MLOps. I work across the product backend,
         and I've gone deepest on the part that sits between the model and the
-        person using it, which I think is where a lot of AI apps quietly succeed
-        or fail.
+        person using it, which is where a lot of AI apps succeed or fail.
       </p>
       <p>
         AI has made me a lot faster, but it hasn't done the thinking for me, and
@@ -72,9 +71,9 @@ const roles = [
 <style>
   .ab-head { padding-top: clamp(2rem, 1.5rem + 3vw, 4rem); }
   .ab-title {
-    font-size: var(--step-3);
-    line-height: 1.12;
-    letter-spacing: -0.018em;
+    font-size: var(--step-2);
+    line-height: 1.22;
+    letter-spacing: 0.01em;
     margin-top: 0.8rem;
   }
 
@@ -85,27 +84,34 @@ const roles = [
     gap: clamp(2rem, 1rem + 4vw, 5rem);
     align-items: start;
   }
-  .ab-prose p { font-size: var(--step-1); line-height: 1.6; color: var(--graphite); }
+  .ab-prose p { font-family: var(--font-sans); font-size: var(--step-1); line-height: 1.65; color: var(--graphite); }
   .ab-prose b { color: var(--ink); }
 
   .ab-side { position: sticky; top: 2rem; }
   .ab-side__label { display: block; margin-bottom: 1.1rem; }
   .ab-side__label--2 { margin-top: 2.4rem; }
 
-  .ab-timeline { list-style: none; padding: 0; display: flex; flex-direction: column; }
+  .ab-timeline {
+    list-style: none; padding: 0; display: flex; flex-direction: column;
+    border: 1px solid var(--ink);
+  }
   .ab-role {
     display: grid;
     grid-template-columns: 1fr;
     gap: 0.15rem;
-    padding: 0.9rem 0;
-    border-top: 1px solid var(--mist);
+    padding: 0.9rem 1rem;
+    border-top: 1px solid var(--ink);
   }
-  .ab-role:last-child { border-bottom: 1px solid var(--mist); }
-  .ab-role__when { color: var(--graphite); }
+  .ab-role:first-child { border-top: 0; }
+  .ab-role__when { color: var(--rust); }
   .ab-role__org { color: var(--ink); font-size: var(--step-0); }
   .ab-role__desc { color: var(--graphite); font-size: var(--step--1); line-height: 1.45; }
 
-  .ab-stack { color: var(--graphite); font-size: var(--step--1); line-height: 1.9; letter-spacing: 0.01em; }
+  .ab-stack {
+    color: var(--graphite); font-size: var(--step--1); line-height: 1.9;
+    letter-spacing: 0.01em;
+    padding: 0.9rem 1rem; border: 1px solid var(--ink); background: var(--panel);
+  }
 
   @media (max-width: 46rem) {
     .ab-body { grid-template-columns: 1fr; }

@@ -66,9 +66,9 @@ import QueueIsolationDiagram from '../../components/QueueIsolationDiagram.astro'
     </p>
     <p>
       It hasn't failed. It hasn't finished. It's just frozen, holding a lock,
-      waiting on a worker that's never coming back. This is the case that quietly
-      loses data if you aren't looking for it. A job that fails at least raises
-      its hand. A stalled one sits there silent.
+      waiting on a worker that's never coming back. This is the case that
+      silently loses data if you aren't looking for it. A job that fails at least
+      raises its hand. A stalled one sits there silent.
     </p>
 
     <h2>Why I didn't just add retries</h2>
@@ -105,7 +105,7 @@ import QueueIsolationDiagram from '../../components/QueueIsolationDiagram.astro'
       Isolated queues plus a recovery pass turn that silent loss into a short
       delay. The insight shows up a few minutes late instead of never. For this
       product, where the whole promise is that the app notices patterns the user
-      can't see themselves, an insight that quietly never arrives is close to the
+      can't see themselves, an insight that never arrives is close to the
       worst thing that can go wrong without anyone noticing.
     </p>
 

@@ -1,25 +1,31 @@
 ---
 import Base from '../layouts/Base.astro'
+
+const notes = [
+  { t: "Why I split Nura's background jobs across two queues", href: '/writing/queue-isolation' },
+  { t: 'Rotating refresh tokens, and the day one shows up twice', href: '/writing/token-rotation' },
+]
 ---
 
-<Base title="Bishal Hona" fit>
+<Base title="Bishal Hona">
   <section class="hero shell">
     <p class="label hero__kicker">Backend engineering for AI products</p>
 
-    <h1 class="serif hero__title">
-      Backend that stays calm<br />when things break.
+    <h1 class="display hero__title">
+      Hi, I'm<br />Bishal Hona.
     </h1>
 
     <p class="hero__lede measure">
-      I'm Bishal Hona, a product-minded backend engineer. I build the systems
-      behind AI products, and I've gone deep on the infrastructure right under
-      the AI features themselves. The background jobs, the memory that survives
-      across sessions, the streaming, the auth. That's the layer where a lot of
-      AI products quietly succeed or fail, so it's the one I've spent the most
-      time getting right.
+      I'm a product-minded backend engineer, and I build the systems behind AI
+      products. I've gone deep on the infrastructure right under the AI features
+      themselves. The background jobs, the memory that survives across sessions,
+      the streaming, the auth. That's the layer where a lot of AI products
+      quietly succeed or fail, so it's the one I've spent the most time getting
+      right.
     </p>
 
-    <p class="hero__ai serif">
+    <p class="hero__ai">
+      <span class="label hero__ai-tag">Thesis</span>
       Plenty of AI products look great in a demo. I build the part that keeps
       them working once real people are using them.
     </p>
@@ -32,19 +38,70 @@ import Base from '../layouts/Base.astro'
       <a class="cta cta--ghost" href="/writing">Read the writing</a>
     </div>
   </section>
+
+  <!-- flat-color scroll sections -->
+  <section class="band band--gold">
+    <div class="shell band__inner">
+      <p class="label band__kicker">01 / selected work</p>
+      <h2 class="display band__title">Nura</h2>
+      <p class="band__lede measure">
+        An AI journaling app built on background agent jobs. The interesting part
+        is underneath: keeping the background work alive when something fails, and
+        deciding when a session can still be trusted. Both run as live diagrams on
+        the case study.
+      </p>
+      <a class="band__cta" href="/work">
+        See how I built it <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="band band--azure">
+    <div class="shell band__inner">
+      <p class="label band__kicker">02 / writing</p>
+      <h2 class="display band__title">Field notes</h2>
+      <ul class="band__notes">
+        {notes.map((n, idx) => (
+          <li>
+            <a class="band__note" href={n.href}>
+              <span class="band__note-n mono">{String(idx + 1).padStart(2, '0')}</span>
+              <span class="band__note-t">{n.t}</span>
+              <span class="band__note-arr" aria-hidden="true">→</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="band band--ink">
+    <div class="shell band__inner">
+      <p class="label band__kicker">03 / contact</p>
+      <h2 class="display band__title">Let's talk</h2>
+      <p class="band__lede measure">
+        If you're building an AI product and the hard part lives underneath the
+        model, that's usually a good first conversation.
+      </p>
+      <a class="band__cta" href="/contact">
+        Get in touch <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
 </Base>
 
 <style>
   .hero {
-    padding-top: clamp(3rem, 2rem + 6vw, 7rem);
-    padding-bottom: clamp(2rem, 1.5rem + 3vw, 4rem);
+    padding-top: clamp(2.5rem, 2rem + 4vw, 5.5rem);
+    padding-bottom: clamp(2.5rem, 2rem + 4vw, 5.5rem);
   }
   .hero__kicker { margin-bottom: 1.6rem; }
+  .hero__kicker::before { content: '> '; color: var(--rust); }
   .hero__title {
     font-size: var(--step-4);
-    line-height: 1.12;
-    letter-spacing: -0.02em;
-    max-width: 18ch;
+    line-height: 1.08;
+    letter-spacing: 0.005em;
+    text-transform: uppercase;
+    max-width: 20ch;
   }
   .hero__lede {
     margin-top: clamp(1.5rem, 1rem + 2vw, 2.4rem);
@@ -54,20 +111,26 @@ import Base from '../layouts/Base.astro'
   }
   .hero__ai {
     margin-top: clamp(1.8rem, 1.2rem + 2vw, 2.8rem);
-    padding-left: 1.1rem;
-    border-left: 2px solid var(--ink);
-    max-width: 46ch;
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--ink);
+    border-left-width: 4px;
+    background: var(--panel);
+    max-width: 52ch;
     font-size: var(--step-1);
-    font-style: italic;
     color: var(--ink);
     line-height: 1.45;
+  }
+  .hero__ai-tag {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--rust);
   }
 
   .hero__actions {
     margin-top: clamp(2rem, 1.4rem + 2vw, 3rem);
     display: flex;
     flex-wrap: wrap;
-    gap: 0.8rem 1.6rem;
+    gap: 0.8rem 1rem;
     align-items: center;
   }
   .cta {
@@ -76,74 +139,99 @@ import Base from '../layouts/Base.astro'
     gap: 0.6em;
     font-family: var(--font-mono);
     font-size: var(--step--1);
-    letter-spacing: 0.04em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--paper);
+    color: var(--invert-fg);
     background: var(--ink);
-    padding: 0.85em 1.3em;
-    border-radius: 3px;
+    padding: 0.9em 1.3em;
+    border-radius: var(--radius);
     border: 1px solid var(--ink);
-    transition: background 200ms var(--ease), color 200ms var(--ease);
+    transition: background 180ms var(--ease), color 180ms var(--ease);
   }
   .cta__arr { transition: transform 220ms var(--ease); }
-  .cta:hover { background: transparent; color: var(--ink); }
+  .cta:hover { background: var(--paper); color: var(--ink); }
   .cta:hover .cta__arr { transform: translateX(4px); }
   .cta--ghost {
-    color: var(--graphite);
+    color: var(--ink);
     background: transparent;
-    border-color: var(--mist);
+    border-color: var(--ink);
   }
-  .cta--ghost:hover { color: var(--ink); border-color: var(--graphite); }
+  .cta--ghost:hover { color: var(--invert-fg); background: var(--ink); }
 
   @media (max-width: 46rem) {
     .hero__title { max-width: none; }
   }
 
   /* ------------------------------------------------------------------------
-     Home-only: the whole page lives in exactly one viewport, no scroll.
-     100dvh accounts for mobile browser chrome. Type and spacing are sized in
-     dvh so the hero shrinks to fit short viewports (small laptops, phones in
-     landscape) instead of overflowing the fixed height. Content is never
-     removed to fit; only type and rhythm compress.
+     Flat-color scroll bands. Each section is a full-bleed flat color; content
+     stays inside the shell. --band carries the section color down to nested
+     framed grids so their hairlines read as ink on the color.
      ------------------------------------------------------------------------ */
-  :global(body.fit) {
-    height: 100dvh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+  .band {
+    border-top: 1px solid var(--ink);
+    padding-block: clamp(2.6rem, 2rem + 4vw, 5rem);
   }
-  :global(body.fit main) {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  :global(body.fit .nav) { padding-block: clamp(0.55rem, 1.6dvh, 1.9rem); }
-  :global(body.fit .foot) {
-    margin-top: 0;
-    padding-block: clamp(0.6rem, 1.8dvh, 3.5rem);
-  }
+  .band--gold  { background: var(--gold);      --band: var(--gold); }
+  .band--azure { background: var(--azure);     --band: var(--azure); }
+  .band--ink   { background: var(--invert-bg); color: var(--invert-fg); --band: var(--invert-bg); }
 
-  :global(body.fit) .hero {
-    padding-top: clamp(0.5rem, 2dvh, 3rem);
-    padding-bottom: clamp(0.5rem, 2dvh, 3rem);
+  .band .label { color: var(--ink); }
+  .band--ink .label { color: var(--invert-mute); }
+
+  .band__kicker { margin-bottom: 0.9rem; }
+  .band__title {
+    font-size: var(--step-3);
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--ink);
   }
-  :global(body.fit) .hero__kicker { margin-bottom: clamp(0.5rem, 1.8dvh, 1.6rem); }
-  :global(body.fit) .hero__title {
-    font-size: clamp(1.7rem, 7.2dvh, var(--step-4));
+  .band--ink .band__title { color: var(--invert-fg); }
+
+  .band__lede {
+    margin-top: clamp(1rem, 0.7rem + 1.2vw, 1.6rem);
+    font-size: var(--step-1);
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--ink) 78%, var(--band));
   }
-  :global(body.fit) .hero__lede {
-    margin-top: clamp(0.5rem, 2.2dvh, 2.4rem);
-    font-size: clamp(0.82rem, 2.4dvh, var(--step-1));
-    line-height: 1.4;
+  .band--ink .band__lede { color: var(--invert-mute); }
+
+  /* writing band note rows */
+  .band__notes { list-style: none; padding: 0; margin-top: clamp(1.2rem, 0.9rem + 1.2vw, 2rem); border: 1px solid var(--ink); }
+  .band__note {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding: clamp(0.9rem, 0.7rem + 0.8vw, 1.3rem) clamp(1rem, 0.8rem + 0.8vw, 1.4rem);
+    border-top: 1px solid var(--ink);
+    color: var(--ink);
+    transition: background 160ms var(--ease);
   }
-  :global(body.fit) .hero__ai {
-    margin-top: clamp(0.5rem, 2.2dvh, 2.8rem);
-    font-size: clamp(0.82rem, 2.2dvh, var(--step-1));
-    line-height: 1.38;
+  .band__notes li:first-child .band__note { border-top: 0; }
+  .band__note:hover { background: color-mix(in srgb, #000 12%, var(--band)); }
+  .band__note-n { color: var(--ink); opacity: 0.7; font-size: var(--step--1); }
+  .band__note-t { flex: 1; font-size: var(--step-1); line-height: 1.3; }
+  .band__note-arr { transition: transform 200ms var(--ease); }
+  .band__note:hover .band__note-arr { transform: translateX(4px); }
+
+  /* band CTA */
+  .band__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-top: clamp(1.4rem, 1rem + 1.5vw, 2.2rem);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.9em 1.3em;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+    transition: background 180ms var(--ease), color 180ms var(--ease);
   }
-  :global(body.fit) .hero__actions {
-    margin-top: clamp(0.8rem, 2.6dvh, 3rem);
-  }
+  .band__cta:hover { background: transparent; color: var(--ink); }
+  .band--ink .band__cta { border-color: var(--paper); background: var(--paper); color: var(--ink); }
+  .band--ink .band__cta:hover { background: transparent; color: var(--paper); }
+
 </style>

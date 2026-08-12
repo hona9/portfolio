@@ -1,10 +1,10 @@
 ---
 const { pathname } = Astro.url
 const links = [
-  { href: '/work', label: 'Work' },
-  { href: '/writing', label: 'Writing' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/work', label: 'Work', key: 'W', tone: 'gold' },
+  { href: '/writing', label: 'Writing', key: 'W', tone: 'azure' },
+  { href: '/about', label: 'About', key: 'A', tone: 'forest' },
+  { href: '/contact', label: 'Contact', key: 'C', tone: 'rust' },
 ]
 const isActive = (href: string) =>
   href === '/' ? pathname === '/' : pathname.startsWith(href)
@@ -12,8 +12,8 @@ const isActive = (href: string) =>
 
 <header class="nav">
   <div class="shell nav__inner">
-    <a href="/" class="nav__mark mono" aria-label="Bishal Hona, home">
-      bishal&nbsp;hona<span class="nav__mark-dot" aria-hidden="true">.</span>
+    <a href="/" class="nav__mark display" aria-label="Bishal Hona, home">
+      bishal_hona<span class="nav__mark-dot" aria-hidden="true">.txt</span>
     </a>
     <nav aria-label="Primary">
       <ul class="nav__list">
@@ -21,10 +21,11 @@ const isActive = (href: string) =>
           <li>
             <a
               href={l.href}
-              class="nav__link label"
+              class="nav__link"
               aria-current={isActive(l.href) ? 'page' : undefined}
             >
-              {l.label}
+              <span class={`nav__key nav__key--${l.tone}`} aria-hidden="true">{l.key}</span>
+              <span class="nav__label label" data-scramble data-text={l.label}>{l.label}</span>
             </a>
           </li>
         ))}
@@ -35,48 +36,111 @@ const isActive = (href: string) =>
 
 <style>
   .nav {
-    padding-block: clamp(1.1rem, 0.8rem + 1vw, 1.9rem);
+    border-bottom: 1px solid var(--ink);
+    background: var(--paper);
   }
   .nav__inner {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     gap: 1.5rem;
+    padding-block: clamp(0.7rem, 0.6rem + 0.6vw, 1.05rem);
   }
   .nav__mark {
-    font-size: var(--step--1);
-    letter-spacing: 0.02em;
-    font-weight: 500;
+    font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.35rem);
     color: var(--ink);
     white-space: nowrap;
+    letter-spacing: 0.02em;
   }
-  .nav__mark-dot { color: var(--graphite); }
+  .nav__mark-dot { color: var(--rust); }
 
   .nav__list {
     list-style: none;
     display: flex;
-    gap: clamp(1rem, 0.6rem + 1.6vw, 2.4rem);
+    align-items: center;
+    gap: clamp(0.9rem, 0.5rem + 1.4vw, 1.9rem);
     padding: 0;
   }
   .nav__link {
-    position: relative;
-    color: var(--graphite);
-    transition: color 200ms var(--ease);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    color: var(--ink);
   }
-  .nav__link:hover { color: var(--ink); }
-  .nav__link[aria-current='page'] { color: var(--ink); }
-  .nav__link[aria-current='page']::after {
+
+  /* the flat-color keycap tile */
+  .nav__key {
+    display: grid;
+    place-items: center;
+    width: 1.5em;
+    height: 1.5em;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-weight: 600;
+    line-height: 1;
+    border: 1px solid var(--ink);
+    user-select: none;
+  }
+  .nav__key--gold   { background: var(--gold);  color: #000; }
+  .nav__key--azure  { background: var(--azure); color: #000; }
+  .nav__key--forest { background: #03331e;      color: #fff; }
+  .nav__key--rust   { background: var(--rust);  color: #fff; }
+  .nav__key--pink   { background: var(--pink);  color: #000; }
+
+  .nav__label {
+    color: var(--graphite);
+    transition: color 140ms var(--ease);
+    /* keep width steady while characters scramble */
+    font-variant-ligatures: none;
+  }
+  .nav__link:hover .nav__label { color: var(--ink); }
+  .nav__link[aria-current='page'] .nav__label { color: var(--ink); }
+  .nav__link[aria-current='page'] .nav__label::after {
     content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -0.5em;
+    display: block;
     height: 1px;
+    margin-top: 2px;
     background: var(--ink);
   }
 
-  @media (max-width: 34rem) {
-    .nav__inner { flex-direction: column; align-items: flex-start; gap: 0.9rem; }
-    .nav__list { gap: 1.3rem; }
+  @media (max-width: 40rem) {
+    .nav__inner { flex-direction: column; align-items: flex-start; gap: 0.85rem; }
+    .nav__list { flex-wrap: wrap; gap: 0.8rem 1.2rem; }
   }
 </style>
+
+<script>
+  // dottxt-style hover decode: the label scrambles through random glyphs and
+  // resolves left-to-right into its real text. Respects reduced-motion.
+  const GLYPHS = '!<>-_\\/[]{}=+*^?#$%01'
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  function scramble(el: HTMLElement) {
+    const text = el.dataset.text || el.textContent || ''
+    if (reduce) { el.textContent = text; return }
+    // guard against overlapping runs on rapid re-hover
+    if ((el as any)._raf) cancelAnimationFrame((el as any)._raf)
+    const start = performance.now()
+    const dur = 90 + text.length * 45
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / dur)
+      const revealed = Math.floor(p * text.length)
+      let out = ''
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i]
+        if (i < revealed || c === ' ') out += c
+        else out += GLYPHS[(Math.random() * GLYPHS.length) | 0]
+      }
+      el.textContent = out
+      if (p < 1) (el as any)._raf = requestAnimationFrame(tick)
+      else { el.textContent = text; (el as any)._raf = null }
+    }
+    ;(el as any)._raf = requestAnimationFrame(tick)
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-scramble]').forEach((el) => {
+    const link = el.closest('a')
+    ;(link || el).addEventListener('mouseenter', () => scramble(el))
+    ;(link || el).addEventListener('focus', () => scramble(el))
+  })
+</script>
