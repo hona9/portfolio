@@ -2,57 +2,87 @@
 import Base from '../layouts/Base.astro'
 
 const roles = [
-  { org: 'Nura', role: 'Backend architecture for an AI journaling app', when: '2025' },
+  { org: 'Nura', role: 'Founder and backend engineer on an app for the night after a fight', when: '2026–' },
   { org: 'Intosoft', role: 'Backend engineer on search, real-time, and billing', when: '2024–2025' },
   { org: 'Yatri Design Studio', role: 'Software engineer on EV charging admin and inventory', when: '2023–2024' },
   { org: 'Leapfrog Technology', role: 'Software engineer intern', when: '2022' },
 ]
 ---
 
-<Base title="About" description="Bishal Hona, a backend engineer with about three years building Node and TypeScript systems, who builds for the failure case and the business case, not just the happy path.">
+<Base title="About" description="Bishal Hona, a backend engineer in Nepal with about three years of Node and TypeScript, currently building Nura, an app for the night after a fight with your partner.">
   <section class="shell ab-head">
     <p class="label">About</p>
-    <h1 class="display ab-title measure">
-      I build backend systems that hold up under real use, real load, and
-      people trying to break them.
-    </h1>
+    <h1 class="display ab-title measure">I'm Bishal, a backend engineer in Nepal.</h1>
   </section>
 
   <section class="shell ab-body">
     <div class="ab-prose measure flow">
       <p>
-        I've spent about three years writing Node and TypeScript backends, and
-        the pattern that keeps repeating is: the feature someone asked for is
-        rarely the hard part. The hard part is what happens around it. A job
-        queue that has to keep running when one job in it fails badly. A
-        session that has to mean the same thing to the database as it does to
-        the person holding it. An endpoint that has to survive someone
-        deliberately poking at it, not just a well-behaved client.
+        I've spent about three years writing Node and TypeScript. For the last
+        few months, most of that time has gone into Nura, an app for the night
+        after a fight with your partner.
       </p>
       <p>
-        I care about the business reasoning behind a decision almost as much
-        as the decision itself. Every extra queue, every retry, every bit of
-        auth complexity has a cost, in engineering time and in what it does to
-        the product's speed. I'd rather ship the boring version that holds up
-        than the clever one that needs a pager at 2am. And I think about the
-        person on the other end of the request, because a backend that's
-        technically correct but slow, or confusing, or quietly drops their
-        data, has failed just as badly as one that's down.
+        Nura started in May as a journaling app with rituals and an insights
+        screen. Building it taught me what the product needed to be. Someone
+        who opens an app at 11pm, still upset, can't face a blank page. They
+        need to be asked the right question, one at a time, and to leave with
+        something they can keep. So I pulled 1,500 posts and 10,000 comments
+        from relationship forums to hear how people actually describe those
+        nights. Then I wrote the product down properly and rebuilt the backend
+        from that spec.
+      </p>
+      <p>That rebuild is the clearest picture of how I work.</p>
+      <p>
+        <b>I start with the person on the other end.</b> In Nura's case, that's
+        someone whose partner might pick up their phone. That one sentence
+        shaped dozens of decisions. There's exactly one notification in the
+        product, and its data type has no room for anyone's words. Deleting an
+        account destroys that person's encryption key before anything else
+        happens. Error reports and traces pass through a gate that drops
+        anything it doesn't recognize, so a crash report can't carry someone's
+        message out of the server.
       </p>
       <p>
-        Security isn't a task I get to after the feature works. Tokens that
-        rotate and get revoked properly, not just issued. Input I don't trust
-        by default, wherever it enters the system. Permissions checked at the
-        layer that actually enforces them, not the one that hides a button. It
-        costs a bit more time up front, and I'd rather spend it than explain
-        later why it didn't happen.
+        <b>I think about what a decision costs and what it earns.</b> Screening
+        every message for safety adds latency and cost to every turn. I took
+        that on after measuring that the cheaper design could never catch more
+        than 30% of what it needed to. Comparing two classifiers across 145
+        test cases then cost 62 cents to run. The paywall shows at the moment
+        someone keeps a card, and never in the middle of a hard conversation.
+        A session that ended with crisis resources on screen never counts
+        toward the free limit. Some of those are engineering calls and some
+        are business calls, and I like being in the room for both.
       </p>
       <p>
-        I keep orchestration, external calls, and storage cleanly separated,
-        mostly so I can reason about what happens when one of them fails
-        before it does. AI tooling has made me faster at writing the code. It
-        hasn't changed how I think about any of this, and I don't expect it
-        to.
+        <b>I care about the parts around the feature.</b> A job queue that keeps
+        running when one job fails badly. A refresh token that signs out every
+        device the moment a stolen one is reused. A background sweep that
+        recovers lost work without ever sending the same notification twice.
+        The feature someone asked for is rarely the hard part.
+      </p>
+      <p>
+        <b>I say what isn't done.</b> Nura's safety screen catches 97% of
+        disclosures in testing. It still misses one kind of message that every
+        engine I've tried misses, and the numbers are fitted on the same cases
+        they're scored on. Both of those are written in the results, beside
+        the headline. I'd rather someone trust a smaller number than question
+        a bigger one.
+      </p>
+      <p>
+        <b>I build with AI coding agents, and I write the rules they work
+        under.</b> I design the system and make the product calls. The rules
+        are types that make wrong states impossible to write, architecture
+        boundaries the build enforces, and a test for every rule that I've
+        watched fail by breaking the code on purpose. Every phase ends with a
+        written log of what shipped, what changed, and what I chose to leave
+        out and why. The agents type faster than I do. Deciding what to build,
+        and what to refuse, is still my job.
+      </p>
+      <p>
+        I'm happiest on small teams building something that matters to the
+        people using it, where the backend engineer is expected to have an
+        opinion about the product.
       </p>
     </div>
 

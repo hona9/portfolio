@@ -1,0 +1,328 @@
+---
+import Article from '../../layouts/Article.astro'
+---
+
+<Article
+  title="The message that has to be noticed"
+  n="01"
+  date="24 September 2026"
+  read="9 min"
+  system="Jev · Claude Haiku · OpenRouter zero retention"
+  standfirst="How I built the safety screen for Nura, and why a small classifier called Jev ended up reading every message first."
+>
+  <div class="prose">
+    <p>
+      Nura is an app for one person in a relationship. Something happens, a
+      fight or a comment that stung, and they open the app, usually at night
+      and often still upset. A short guided conversation helps them slow the
+      moment down and work out what actually happened.
+    </p>
+
+    <p>
+      Most of what people type is ordinary hurt. "He said I always do this."
+      "I cried in the shower after." A small number of messages are something
+      else. Someone mentions that their partner took their bank card and gives
+      them an allowance. Someone says the people around them would be better
+      off. Someone mentions their GCSE revision, which means they're probably
+      sixteen.
+    </p>
+
+    <p>
+      Those messages can't be worked on like a normal argument. They need the
+      conversation to stop and the person to be shown real help, calmly.
+      Getting that right became the most careful piece of engineering in the
+      whole project. This is how it went.
+    </p>
+
+    <h2>The first version couldn't see most of it</h2>
+    <p>
+      The original design was reasonable on paper. A list of regular
+      expressions scanned each message for alarming phrases. If one matched,
+      the message went to Claude Haiku for a proper classification. If nothing
+      matched, the message went straight through.
+    </p>
+
+    <p>
+      When I sat down to audit it, I wrote a set of test cases first: 69
+      messages that should interrupt a session, written six different ways.
+      Some say it directly. Some hedge ("it would be easier if I wasn't
+      around"). Some bury it in one clause of a long account of a fight. Some
+      say it and take it back in the same breath. Some frame it as care ("he
+      checks where I am because he loves me"). And some only make sense next
+      to the message before them.
+    </p>
+
+    <p>
+      The keyword scan let 21 of the 69 through to the classifier. That's a
+      ceiling of 30%, before any model had read a word. For the cases that
+      depend on the previous message, the number was 0 of 8. The code was
+      correctly passing six turns of history to the classifier, and that code
+      never ran for the exact cases it was written for.
+    </p>
+
+    <p>
+      People in hard situations rarely use the words a regex expects. "He
+      changed my password" contains nothing alarming. The scan had to go.
+    </p>
+
+    <h2>Every message, before anything is shown</h2>
+    <p>
+      So the first real change was structural. Every message gets classified.
+      The classification runs at the same time as Nura drafts its reply, and
+      nothing reaches the screen until the safety verdict is in. In the code,
+      that's one <code>await</code> placed before the first thing the turn
+      sends.
+    </p>
+
+    <p>
+      That raised a question I had to answer in writing: what happens when the
+      classifier is down? Failing closed on everything would send every user
+      to a crisis screen during an outage, which is its own kind of harm. I
+      settled on this: during an outage, a message the keyword scan matched
+      still routes to the safety screen, and everything else gets a calm "Nura
+      lost the thread for a moment. Your words are saved." The keyword list
+      survived, demoted to a backup.
+    </p>
+
+    <p>
+      Classifying every message also made the choice of classifier matter a
+      lot more. Now it would read every sentence anyone ever typed into the
+      app, and add its latency to every turn.
+    </p>
+
+    <h2>The bake-off</h2>
+    <p>
+      I ran two engines against the same cases. One was Haiku with a written
+      prompt. The other was Jev, a safety classifier from TypeSafe AI. Jev
+      works differently from a chat model. You give it the message, the recent
+      turns and a set of named questions, one per category (self-harm,
+      domestic violence, abuse, coercive control, and "this person is a
+      minor"), and it answers each question with a probability from 0 to 1.
+    </p>
+
+    <p>
+      Before a single real test ran, Jev had to pass a privacy check. Nura
+      handles some of the most sensitive text a person can write, and the rule
+      for every model call is zero data retention. Jev is served through
+      OpenRouter's System One endpoint, which is on their zero-retention list,
+      and every request goes out with retention off and data collection
+      denied. If that check had failed, the numbers wouldn't have mattered.
+    </p>
+
+    <p>
+      The test set grew to 145 cases: the 69 disclosures and 76 ordinary
+      messages, including the ones most likely to fool a classifier. "This
+      relationship is killing me." "I can't breathe around her." "He hit me
+      with a comment about my mum." Every case ran three times. A disclosure
+      only counted as caught if it was caught on all three runs, and an
+      ordinary message counted as a false alarm if it was flagged on any of
+      them. A safety screen that works two times out of three works zero times
+      for the person on the third.
+    </p>
+
+    <p>
+      The first run was humbling. Both engines landed on 86%, short of the 95%
+      bar, and both missed the same kind of case: they judged age from surface
+      words. That told me the problem was in how I had defined the categories,
+      so I rewrote the definitions and the reading guidance both engines
+      receive, and ran it again.
+    </p>
+
+    <p>On the new wording:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Caught</th>
+            <th>False alarms</th>
+            <th>Failed to answer</th>
+            <th>Median time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Jev, one threshold of 0.5</th>
+            <td>94% (65 of 69)</td>
+            <td>5% (4 of 76)</td>
+            <td>0 of 435</td>
+            <td>720 ms</td>
+          </tr>
+          <tr>
+            <th scope="row">Haiku, reading every message</th>
+            <td>84% (58 of 69)</td>
+            <td>13% (10 of 76)</td>
+            <td>25 of 435</td>
+            <td>1,679 ms</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      The same rewrite moved the two engines in opposite directions. Jev's
+      recall went from 86% to 94% with no extra false alarms. Haiku's recall
+      held steady while its false alarms doubled. Jev was also more than twice
+      as fast, and it never once failed to answer, which matters when every
+      turn waits for it.
+    </p>
+
+    <p>
+      So Jev became the primary engine. Haiku stayed, in a smaller role.
+    </p>
+
+    <h2>Numbers in, decisions made in code</h2>
+    <p>
+      A rule runs through the whole Nura codebase: the model reads, the code
+      decides. Jev returns five numbers. What those numbers mean for a person
+      is decided in plain TypeScript, in a table I can read, test and argue
+      with.
+    </p>
+
+    <p>
+      Each category gets two lines, a "possible" line and a "clear" line, and
+      each category has its own reason for where they sit.
+    </p>
+
+    <ul>
+      <li>
+        <strong>Self-harm and violence</strong> interrupt the session at
+        "possible", with a way back offered, and at "clear" without one.
+        Missing one of these is the failure the entire screen exists to
+        prevent.
+      </li>
+      <li>
+        <strong>Abuse and coercion</strong> ask for a second opinion at
+        "possible". These are the categories where Jev's scores overlap most
+        with ordinary evenings. An argument about who handles the budget reads
+        a little like control. So the uncertain middle goes to Haiku, and its
+        answer decides.
+      </li>
+      <li>
+        <strong>A message that reads like it came from a minor</strong> is
+        recorded for review, and the session carries on. Age is checked at
+        signup, and being sixteen isn't a danger by itself, so that row never
+        leads to the crisis screen.
+      </li>
+    </ul>
+
+    <p>
+      Haiku also covers for Jev. If Jev times out or returns something
+      unreadable, Haiku classifies the message instead, through the same
+      tables.
+    </p>
+
+    <h2>Letting the scores tell me where the lines go</h2>
+    <p>
+      The first lines I drew were educated guesses. To do better, I made the
+      eval runner record every score, then wrote two tools that read the
+      recording without calling any model: one replays the whole test set
+      under different lines, and one checks calibration, meaning how often a
+      score in a given range really was a disclosure.
+    </p>
+
+    <p>
+      Calibration was the most useful thing I built in the whole safety phase.
+      Self-harm scores were sharp: everything at 0.6 or above was a real
+      disclosure. Abuse scores were much fuzzier. Nothing below 0.6 was a real
+      abuse disclosure, even though the first draft sent anything above 0.15
+      to a second opinion. On abuse, a score of 0.5 meant close to nothing.
+    </p>
+
+    <p>
+      Moving abuse's lines to 0.55 and 0.6 kept recall at 97% and cut false
+      alarms from 13% to 9%. The number of messages that needed Haiku's second
+      opinion dropped from 81 to 35 out of 435. Fewer people interrupted on an
+      ordinary night, fewer model calls, and the same catch rate.
+    </p>
+
+    <p>
+      That replay tool had a bug, and I want to mention it because of what
+      kind of bug it was. When a setting needed a Haiku answer that the
+      recording didn't have, the first version counted the missing answer as a
+      catch. That made one coercion setting look perfect. The fix was to count
+      a missing answer against the setting both ways, so an incomplete log can
+      make a setting look worse and never better. Safety tooling that flatters
+      you is worse than having none.
+    </p>
+
+    <h2>Small decisions that turned out to matter</h2>
+    <p>
+      <strong>Pinning the exact build.</strong> I asked OpenRouter for
+      <code>jev-1.13</code> and the answer came back from
+      <code>jev-1.13-20260917</code>. The short name was an alias that could
+      point at a newer build tomorrow. Every line in the table was fitted on
+      one build's scores, and a quiet vendor update would move all of them
+      without anyone deciding to. So the request names the dated build, and an
+      answer from any other build counts as a failure.
+    </p>
+
+    <p>
+      <strong>Encrypting what the classifier thought.</strong> When a message
+      is flagged, the record keeps which engine decided and what it read.
+      Those readings are inferences about a person, so they're encrypted under
+      that person's own key, the same as their words. Deleting their account
+      destroys the key, and the readings go with it.
+    </p>
+
+    <p>
+      <strong>Watching in aggregate only.</strong> I wanted to know if Jev's
+      behaviour drifted in production, without building a store of per-message
+      safety scores. The monitor writes one summary line every fifteen
+      minutes, and only once at least 50 messages have come in, so no single
+      person's evening can be picked out of it.
+    </p>
+
+    <p>
+      <strong>Proving the tests can fail.</strong> Every rule in this phase
+      shipped with a test, and every test was checked by breaking the code on
+      purpose and watching it turn red. Across the Jev work that was more than
+      fifty deliberate breaks.
+    </p>
+
+    <h2>What still isn't solved</h2>
+    <p>
+      The design catches 97% of the test disclosures. Two categories still sit
+      below their own bars. Self-harm is at 95% against a bar of 98%, and the
+      one miss is a message that every engine in every run has missed: a
+      single clause about preparing a letter "for after", buried in a longer
+      message about something else. Jev scores it near zero, so no threshold
+      will catch it. It needs better wording in the definitions, and I haven't
+      found that wording yet.
+    </p>
+
+    <p>
+      The bigger caveat is that the lines were fitted on the same cases
+      they're scored on. That's fine for finding a starting point and useless
+      as proof. Before launch, a new set of test cases has to be written by
+      someone who has never seen these results, and the design has to hold up
+      against it.
+    </p>
+
+    <p>
+      And a safety screen is only as good as where it sends people. The crisis
+      resources page still needs phone lines verified with their operators,
+      Kathmandu first, and wording reviewed by counsel. Nobody should fill
+      that in from memory, including me.
+    </p>
+
+    <h2>What I took from it</h2>
+    <p>
+      The biggest improvement in this whole project came from writing better
+      test cases before choosing any model. The keyword scan looked fine until
+      I wrote messages the way people actually talk about hard things. Both
+      engines looked stuck at 86% until I noticed they were failing on my
+      definitions.
+    </p>
+
+    <p>
+      Jev earned its place by being fast, consistent and honest about
+      uncertainty, since a probability is something I can draw lines on and
+      check. Haiku earned its place by being good at reading the uncertain
+      middle. And the table between them, a few dozen lines of TypeScript, is
+      where the actual decisions about people get made, which is exactly where
+      I want them.
+    </p>
+  </div>
+</Article>

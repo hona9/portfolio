@@ -1,27 +1,30 @@
 ---
 import Base from '../layouts/Base.astro'
-import QueueIsolationDiagram from '../components/QueueIsolationDiagram.astro'
-import TokenRotationDiagram from '../components/TokenRotationDiagram.astro'
 
 const meta = [
-  { k: 'Role', v: 'Backend architecture & implementation' },
-  { k: 'Stack', v: 'Node · TypeScript · PostgreSQL · Redis · BullMQ' },
-  { k: 'Shape', v: 'AI journaling app · async agent pipelines' },
+  { k: 'Role', v: 'Founder and backend engineer' },
+  { k: 'Stack', v: 'TypeScript · Node · PostgreSQL · Redis · AWS KMS · Claude and Jev through OpenRouter' },
+  { k: 'Build', v: 'Six weeks, pre-launch' },
+  { k: 'Status', v: 'Backend complete · 2,599 tests · mobile app next' },
+]
+
+const hood = [
+  { k: 'One repo, two processes', v: 'An API and a background worker, with a build rule proving the worker never loads the web server. Seven job queues, retries, dead letters, and sweeps that recover lost jobs without ever sending anything twice.' },
+  { k: 'Memory without vector search', v: 'Typed records and a pure function that folds them into competing explanations, each with a confidence score and linked quotes. You can always say why something is in the model\u2019s context.' },
+  { k: 'One gateway for every model call', v: 'Through OpenRouter, with zero data retention required on every request. If a provider can\u2019t honor that, the request is refused.' },
+  { k: 'Versioned everything', v: 'Prompts, models and product rules are versioned files in the repo. Every card and record stores the version that produced it.' },
+  { k: 'Streaming conversation over SSE', v: 'Every generated line is checked against Nura\u2019s voice rules (no diagnosis words, no clichés, no exclamation marks) before it\u2019s shown.' },
+  { k: 'Accounts', v: '15-minute access tokens, rotating refresh tokens, and a full sign-out on every device if a used token ever reappears. Export and deletion of everything, behind a password check.' },
+  { k: 'Billing through RevenueCat', v: 'Each webhook is treated as a prompt to re-read the source of truth, so duplicate and late events are harmless.' },
 ]
 ---
 
-<Base title="Work · Nura" description="How I built Nura's backend: two isolated job queues with a recovery pass, and rotating auth tokens that catch a reused token and log the user out everywhere.">
+<Base title="Work · Nura" description="Nura, a guided space for the night after a fight: five decisions that shaped its backend, from safety screening on every message to quotes that are checked against the transcript before they reach a card.">
   <article class="case">
     <header class="case__head shell">
       <p class="label">Case study / 01</p>
       <h1 class="display case__title">Nura</h1>
-      <p class="case__standfirst measure">
-        Nura is an AI journaling app, built on background agent jobs. The app
-        itself is calm and almost wordless, but there's a lot going on
-        underneath it. Two of those decisions matter most to me: how I keep the
-        background work from taking itself down when something fails, and how I
-        decide a session can still be trusted. Both are running below.
-      </p>
+      <p class="case__standfirst measure">A guided space for the night after a fight.</p>
 
       <dl class="case__meta panel">
         {meta.map((m) => (
@@ -33,74 +36,244 @@ const meta = [
       </dl>
     </header>
 
-    <!-- Diagram 1 -->
     <section class="case__section shell">
       <div class="case__lead measure">
-        <p class="label case__index">Mechanism 01 / queue isolation</p>
-        <h2 class="case__h2">One stuck job shouldn't freeze the whole app</h2>
+        <p class="label case__index">The moment</p>
+        <h2 class="case__h2">The moment it's built for</h2>
         <p>
-          When a session closes, two background jobs fire. One looks back over
-          what happened in the session; the other generates an insight, but only
-          when the user's patterns cross a threshold. I put these on
-          <b>separate queues</b> on purpose. If the analysis job stalls, it stays
-          on its own queue instead of starving insight generation, and a recovery
-          pass comes back around for anything left stuck. For the user, one
-          broken pipeline never freezes the rest of the app, and a late insight
-          beats one that never comes. The diagram below runs the real
-          thing.
+          It's 11pm. Someone has just had the same argument with their partner
+          for the fourth time this year. Their friends will take a side. A
+          chatbot will hand them an empty box and wait for them to explain
+          themselves, at the exact moment they can least do it. Therapy is
+          weeks away and treats this as something clinical.
+        </p>
+        <p>
+          Nura is for that person, at that hour. They open the app, tap
+          <b>Something happened</b>, and Nura asks one question at a time for
+          about ten minutes. It asks how they are before it asks about the
+          fight. It notices the word they keep using. When they're done, a card
+          deals onto the screen: what happened, what they felt, and on the
+          back, one observation in their own words and one small thing to try
+          tomorrow.
+        </p>
+        <p>
+          The next evening, a single quiet notification asks how it went. After
+          a few sessions, a screen called the Mirror shows them the loop they
+          keep ending up in, with a quote from them under every step.
         </p>
       </div>
-      <QueueIsolationDiagram />
     </section>
 
-    <!-- Diagram 2 -->
     <section class="case__section shell">
       <div class="case__lead measure">
-        <p class="label case__index">Mechanism 02 / token rotation</p>
-        <h2 class="case__h2">A stolen session shouldn't stay alive</h2>
+        <p class="label case__index">The bet</p>
+        <h2 class="case__h2">Why it can win</h2>
         <p>
-          Access uses a short-lived token. The long-lived one <b>rotates every
-          time it's used</b>, and that rotation is what lets me catch theft. If a
-          token that already rotated shows up again, two people are holding it,
-          and one of them shouldn't be. So I revoke every session for that user
-          at once, not just the suspicious request. Killing only the one request
-          would leave the attacker a working token somewhere else. For the user,
-          a leaked token can't hold a door open into their journal. The
-          diagram catches a reuse as it happens.
+          Anyone can wrap a model in a chat window. Nura's edge is what it
+          remembers and how carefully it earns the right to say something.
+          Every session becomes a structured record. The records become
+          evidence. By the tenth session Nura knows things about this person's
+          pattern that a fresh chatbot never will, and the person can see
+          exactly which of their own words each claim rests on.
+        </p>
+        <p>
+          The business model follows the same values. There are three free
+          sessions, then one plan. The paywall appears only at the moment
+          someone keeps their third card, never in the middle of a
+          conversation. A session that ended with crisis resources on screen
+          never counts toward the limit. People keep read access to everything
+          they wrote, forever, whether they pay or not.
+        </p>
+        <p>
+          The first users are 25 to 34, in relationships of a year or more,
+          starting with testers in Kathmandu and remote teams. The product
+          treats family involvement in relationship decisions as normal
+          context, which matters in South Asia and is something most Western
+          tools get wrong.
         </p>
       </div>
-      <TokenRotationDiagram />
     </section>
 
-    <!-- system at a glance -->
     <section class="case__section shell">
       <div class="case__lead measure">
-        <p class="label case__index">03 / the rest of the system</p>
-        <h2 class="case__h2">The rest of the system, briefly</h2>
+        <p class="label case__index">Decisions</p>
+        <h2 class="case__h2">Five decisions that shaped it</h2>
+      </div>
+    </section>
+
+    <section class="case__section case__section--tight shell">
+      <div class="case__lead measure">
+        <p class="label case__index">01 / five</p>
+        <h3 class="case__h2">The model reads, the code decides</h3>
+        <p>
+          Language models in Nura do four jobs: write the next line, pull
+          structure out of a finished session, screen messages for safety, and
+          grade test runs. Everything that has consequences for a person is
+          ordinary, tested code. Which question comes next, when a pattern is
+          allowed on screen, when someone reaches the paywall, when a
+          conversation stops for safety.
+        </p>
+        <p>
+          That split is why one of the product's hardest rules can be
+          guaranteed. Someone whose problem is a real difference in values
+          (kids, where to live, religion) must never be handed communication
+          exercises, as if better listening would fix it. That help is gated
+          behind evidence, and a unit test runs a full values-conflict history
+          through every session type to prove the exercises can't be reached.
+        </p>
+      </div>
+    </section>
+
+    <section class="case__section case__section--tight shell">
+      <div class="case__lead measure">
+        <p class="label case__index">02 / five</p>
+        <h3 class="case__h2">No quote, no claim</h3>
+        <p>
+          The worst thing Nura could do is tell someone "you said this" about
+          words they never said. So when a session ends, every quote the model
+          pulls out is matched against the saved transcript before it can reach
+          a card or the Mirror. A quote that doesn't match is dropped in code.
+        </p>
+        <p>
+          The end-to-end test includes one evening where the model invents a
+          quote on purpose. Switch the check off and that invented sentence
+          lands on a card, and two tests fail. Patterns are recalculated from
+          the full history every time, so when someone deletes a session,
+          everything Nura believed because of it disappears too.
+        </p>
+      </div>
+    </section>
+
+    <section class="case__section case__section--tight shell">
+      <div class="case__lead measure">
+        <p class="label case__index">03 / five</p>
+        <h3 class="case__h2">Every message is screened before anything is shown</h3>
+        <p>
+          Some people will write about self-harm, abuse or a partner who
+          controls their money. Those moments need the conversation to stop and
+          real help to appear, calmly.
+        </p>
+        <p>
+          The first design scanned for alarming keywords. I wrote 69 test
+          messages the way people actually say these things, and the scan
+          caught 21 of them. Now every message is scored by Jev, a dedicated
+          safety classifier, while Nura drafts its reply, and nothing reaches
+          the screen until the verdict is in. The thresholds live in code, one
+          set per category. Claude Haiku gives a second opinion where ordinary
+          arguments and real control look alike.
+        </p>
+        <p>
+          On 145 test messages the design catches 97% of disclosures with 9%
+          false alarms. I wrote up how that went, including what's still
+          unsolved, in <a href="/writing/jev-safety-classifier">the Jev post</a>.
+        </p>
+      </div>
+    </section>
+
+    <section class="case__section case__section--tight shell">
+      <div class="case__lead measure">
+        <p class="label case__index">04 / five</p>
+        <h3 class="case__h2">Privacy for the person whose partner might pick up the phone</h3>
+        <p>That's the threat model, and it changes a lot of small decisions.</p>
+        <ul>
+          <li>
+            There's exactly one notification in the whole product, and its data
+            type has no field that could carry anyone's words. It says "A quick
+            check-in when you have a minute" and nothing else.
+          </li>
+          <li>
+            Each person's words are encrypted under their own key. Deleting an
+            account destroys that key first, before a single row is touched.
+          </li>
+          <li>
+            Error reports and traces pass through a gate that drops anything it
+            doesn't recognize. No message, name or user id ever leaves the
+            server, even inside a crash report.
+          </li>
+          <li>
+            Consent is stored with a fingerprint of the exact words the person
+            agreed to. If those words ever change, Nura stops processing and
+            asks again rather than assuming.
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="case__section case__section--tight shell">
+      <div class="case__lead measure">
+        <p class="label case__index">05 / five</p>
+        <h3 class="case__h2">Measure what helps, refuse what hooks</h3>
+        <p>
+          There are no streaks, no daily reminders and no "you haven't opened
+          Nura in a while". The weekly quality review watches six numbers, such
+          as how long a card takes to arrive and how often people read the back
+          of it. Session length, return rate and streaks are listed in the code
+          as numbers the product must never track, and adding one breaks a
+          test. Sessions that ended in a safety hand-off are kept out of the
+          drop-off rate, so nobody is ever rewarded for making safety quieter.
+        </p>
+      </div>
+    </section>
+
+    <section class="case__section shell">
+      <div class="case__lead measure">
+        <p class="label case__index">Under the hood</p>
+        <h2 class="case__h2">Under the hood</h2>
       </div>
       <div class="case__facts">
-        <div class="case__fact panel">
-          <p class="label">Provider abstraction</p>
-          <p>Claude runs as the main model, with OpenRouter as a fallback and a mock version for tests. Switching models means changing one environment variable, and the code stays untouched. If the main provider has a bad day, the app keeps answering.</p>
-        </div>
-        <div class="case__fact panel">
-          <p class="label">Context assembly</p>
-          <p>Each user's context comes from their strongest patterns plus their most recent session summaries, all kept under a 4k-token budget. Every request logs what went into it. The model stays grounded in the user's real history without the cost creeping up.</p>
-        </div>
-        <div class="case__fact panel">
-          <p class="label">Clean architecture</p>
-          <p>The domain, application, infrastructure, and presentation layers stay separate, wired together with constructor injection. That keeps every use case testable without spinning up a database or an HTTP server.</p>
-        </div>
-        <div class="case__fact panel">
-          <p class="label">Server-driven UI</p>
-          <p>The app pulls its feature flags, config, and copy from a bootstrap endpoint when it starts. So rolling out a feature or fixing a bit of wording doesn't need an App Store update.</p>
-        </div>
+        {hood.map((h) => (
+          <div class="case__fact panel">
+            <p class="label">{h.k}</p>
+            <p>{h.v}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="case__section shell">
+      <div class="case__lead measure">
+        <p class="label case__index">Process</p>
+        <h2 class="case__h2">How I build</h2>
+        <p>
+          I designed Nura's product and architecture and built it with Claude
+          Code as my coding agent. That works only with firm rules, so I wrote
+          them down. Types make impossible states impossible to write.
+          Decisions live in pure functions. Architecture boundaries are
+          enforced by the build. And every rule ships with a test I've watched
+          fail by breaking the code on purpose.
+        </p>
+        <p>
+          Each phase ends with a written log of what shipped, what changed on
+          the way, and what I chose not to do and why. About 40,000 lines of
+          code and 37,000 lines of tests later, the log is the reason the
+          codebase still makes sense.
+        </p>
       </div>
     </section>
 
     <aside class="case__note shell">
-      <p class="label">Note</p>
-      <p>The architecture here is real and running. Both diagrams model the actual mechanisms from the codebase, timings and all.</p>
+      <p class="label">Where it stands</p>
+      <p>
+        The backend MVP is built: three session types, cards, follow-ups, the
+        Mirror, safety, payments, deletion and export, observability, and a
+        compliance file.
+      </p>
+      <p>Before anyone outside the team uses it:</p>
+      <ul>
+        <li>a zero-retention route for Claude that meets Nura's own privacy rules</li>
+        <li>a fresh safety test set written by someone who hasn't seen the results</li>
+        <li>crisis lines verified with their operators, starting with Kathmandu</li>
+        <li>the mobile app</li>
+      </ul>
+      <p>
+        Then ten testers. The bar is that at least seven of them say the card
+        got it right.
+      </p>
+      <p class="case__note-links">
+        There is a holding page at <a href="https://nuraheals.com" rel="noopener" target="_blank">nuraheals.com</a>,
+        and the rest of my code is at <a href="https://github.com/hona9" rel="noopener" target="_blank">github.com/hona9</a>.
+        Nura's own repository is private.
+      </p>
     </aside>
   </article>
 </Base>
@@ -148,6 +321,19 @@ const meta = [
     color: var(--graphite); font-size: var(--step-0); line-height: 1.6;
   }
   .case__lead b { color: var(--ink); font-weight: 500; }
+  .case__lead > p + p { margin-top: 1rem; }
+  .case__lead a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  .case__lead ul {
+    margin-top: 1rem;
+    padding-left: 1.2rem;
+    color: var(--graphite);
+    font-size: var(--step-0);
+    line-height: 1.6;
+  }
+  .case__lead li + li { margin-top: 0.7rem; }
+
+  /* the five decisions sit closer together under their group heading */
+  .case__section--tight { padding-top: clamp(1.8rem, 1.2rem + 2.5vw, 3rem); }
 
   .case__facts {
     margin-top: 1.4rem;
@@ -168,8 +354,13 @@ const meta = [
     border-radius: var(--radius);
     max-width: 60ch;
   }
+  .case__note > * + * { margin-top: 0.8rem; }
   .case__note p:first-child { margin-bottom: 0.4rem; color: var(--rust); }
-  .case__note p:last-child { color: var(--invert-mute); font-size: var(--step--1); line-height: 1.55; }
+  .case__note p:not(:first-child),
+  .case__note li { color: var(--invert-mute); font-size: var(--step--1); line-height: 1.55; }
+  .case__note ul { padding-left: 1.1rem; }
+  .case__note li + li { margin-top: 0.3rem; }
+  .case__note-links { padding-top: 0.8rem; border-top: 1px solid var(--invert-rule); }
 
   @media (max-width: 40rem) {
     .case__facts { grid-template-columns: 1fr; }

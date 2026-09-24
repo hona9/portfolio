@@ -4,40 +4,40 @@ import Base from '../layouts/Base.astro'
 const posts = [
   {
     n: '01',
-    slug: '/writing/queue-isolation',
-    title: 'Why I split Nura’s background jobs across two queues',
+    slug: '/writing/jev-safety-classifier',
+    title: 'The message that has to be noticed',
     thesis:
-      'One queue is the obvious way to start, and it works right up until one kind of job jams and takes everything else down with it. Splitting them later is far more painful than splitting them early.',
+      'A keyword scan let 21 of 69 test disclosures through to the classifier. Now every message in Nura is classified before anything is shown, by Jev first, with Haiku reading the uncertain middle.',
     tradeoff:
-      'You take on more moving parts and a recovery pass to babysit. In return, a failure stays where it happened.',
-    system: 'session-analysis · insight-generation',
+      'Every turn waits on the safety verdict, so the classifier\u2019s latency is paid on every message. Jev answered in a median 720 ms against Haiku\u2019s 1,679 ms, and never failed to answer.',
+    system: 'Jev · Claude Haiku · OpenRouter zero retention',
     read: '9 min',
-    glyph: 'queues',
+    date: '24 Sep 2026',
+    glyph: 'screen',
   },
   {
     n: '02',
-    slug: '/writing/token-rotation',
-    title: 'Rotating refresh tokens, and the day one shows up twice',
+    slug: '/writing/no-streaks',
+    title: 'Why my app has no streaks',
     thesis:
-      'Most people rotate refresh tokens for basic hygiene. It turned out to be more useful than that. Once a token dies the moment it’s used, a token that shows up twice is telling you something, and you can act on it.',
+      'Nura\u2019s weekly review watches six numbers, and the list is closed in the code. Session length, return rate and streaks are written down as things it never tracks, and a recovery sweep that would have nudged people every night was cut to six hours.',
     tradeoff:
-      'Now and then you’ll log out a real user who did nothing wrong. That’s the price for making sure a stolen session can never hang around unnoticed.',
-    system: 'JWT access · rotating refresh · Redis blacklist',
-    read: '11 min',
-    glyph: 'tokens',
+      'There is no daily-active chart to show anyone who asks about retention. The real rhythm of use is still unknown, because nobody outside the team has used Nura yet.',
+    system: 'Quality review · closed metric list · recovery sweeps',
+    read: '8 min',
+    date: '24 Sep 2026',
+    glyph: 'days',
   },
 ]
 ---
 
-<Base title="Writing" description="Working notes on backend infrastructure: how I isolate background jobs so one failure doesn't take down the rest, and how I rotate auth tokens to catch a stolen session.">
+<Base title="Writing" description="Working notes on backend decisions in Nura: how every message gets a safety screen before anything is shown, and why the app keeps no streaks.">
   <section class="shell w-head">
     <p class="label">Writing</p>
-    <h1 class="display w-title">Field notes from the layer<br />no one screenshots.</h1>
+    <h1 class="display w-title">Field notes on<br />Nura's backend.</h1>
     <p class="w-intro measure">
-      These are working notes on the decisions behind the infrastructure I build.
-      I care more about why I made a call than the exact syntax, so there's no
-      code here. I draw the mechanisms instead. Two posts to start. I'll add more
-      when I've got something worth explaining.
+      Notes on backend decisions in Nura, with the code and the config values
+      behind them. Two so far.
     </p>
   </section>
 
@@ -46,7 +46,7 @@ const posts = [
       <a class="entry" href={p.slug}>
         <div class="entry__meta">
           <span class="label">Field note {p.n}</span>
-          <span class="label entry__read">{p.read}</span>
+          <span class="label entry__read">{p.date} · {p.read}</span>
         </div>
 
         <div class="entry__body">
@@ -63,21 +63,36 @@ const posts = [
         </div>
 
         <div class="entry__glyph" aria-hidden="true">
-          {p.glyph === 'queues' ? (
+          {p.glyph === 'screen' ? (
             <svg viewBox="0 0 132 84" class="glyph">
-              <rect class="g-node" x="2" y="34" width="22" height="16" rx="2" />
-              <line class="g-line g-live" x1="30" y1="26" x2="104" y2="26" />
-              <line class="g-line g-dash" x1="30" y1="58" x2="104" y2="58" />
-              <rect class="g-node" x="108" y="18" width="22" height="16" rx="2" />
-              <rect class="g-node g-idle" x="108" y="50" width="22" height="16" rx="2" />
+              <rect class="g-node g-idle" x="2" y="8" width="22" height="12" rx="2" />
+              <rect class="g-node g-idle" x="2" y="36" width="22" height="12" rx="2" />
+              <rect class="g-node" x="2" y="64" width="22" height="12" rx="2" />
+              <line class="g-line g-dash" x1="30" y1="14" x2="60" y2="42" />
+              <line class="g-line g-dash" x1="30" y1="42" x2="60" y2="42" />
+              <line class="g-line g-live" x1="30" y1="70" x2="60" y2="42" />
+              <rect class="g-node" x="60" y="30" width="14" height="24" rx="2" />
+              <line class="g-line g-dash" x1="74" y1="36" x2="104" y2="22" />
+              <line class="g-line g-live" x1="74" y1="48" x2="104" y2="62" />
+              <rect class="g-node g-idle" x="108" y="14" width="22" height="16" rx="2" />
+              <rect class="g-node" x="108" y="54" width="22" height="16" rx="2" />
             </svg>
           ) : (
             <svg viewBox="0 0 132 84" class="glyph">
-              <rect class="g-node g-idle" x="6" y="34" width="30" height="16" rx="2" />
-              <rect class="g-node g-idle" x="51" y="34" width="30" height="16" rx="2" />
-              <rect class="g-node" x="96" y="34" width="30" height="16" rx="2" />
-              <line class="g-strike" x1="6" y1="42" x2="36" y2="42" />
-              <line class="g-strike" x1="51" y1="42" x2="81" y2="42" />
+              <rect class="g-node g-idle" x="2" y="22" width="14" height="14" rx="2" />
+              <rect class="g-node g-idle" x="20.5" y="22" width="14" height="14" rx="2" />
+              <rect class="g-node" x="39" y="22" width="14" height="14" rx="2" />
+              <rect class="g-node g-idle" x="57.5" y="22" width="14" height="14" rx="2" />
+              <rect class="g-node g-idle" x="76" y="22" width="14" height="14" rx="2" />
+              <rect class="g-node g-idle" x="94.5" y="22" width="14" height="14" rx="2" />
+              <rect class="g-node g-idle" x="113" y="22" width="14" height="14" rx="2" />
+              <rect class="g-node g-idle" x="2" y="46" width="14" height="14" rx="2" />
+              <rect class="g-node g-idle" x="20.5" y="46" width="14" height="14" rx="2" />
+              <rect class="g-node" x="39" y="46" width="14" height="14" rx="2" />
+              <rect class="g-node g-idle" x="57.5" y="46" width="14" height="14" rx="2" />
+              <rect class="g-node g-idle" x="76" y="46" width="14" height="14" rx="2" />
+              <rect class="g-node g-idle" x="94.5" y="46" width="14" height="14" rx="2" />
+              <rect class="g-node g-idle" x="113" y="46" width="14" height="14" rx="2" />
             </svg>
           )}
         </div>
@@ -90,9 +105,8 @@ const posts = [
   <section class="shell w-foot">
     <hr class="hr" />
     <p class="w-journal measure">
-      This is more of a running journal than a publishing schedule. I write one
-      up when a decision was interesting enough to be worth making, and worth
-      explaining afterward.
+      There is no schedule. I write one up when a decision took long enough to
+      be worth recording.
     </p>
   </section>
 </Base>
@@ -200,12 +214,10 @@ const posts = [
   .g-line { stroke-width: 1.5; }
   .g-live { stroke: var(--ink); }
   .g-dash { stroke: var(--rule); stroke-dasharray: 4 4; }
-  .g-strike { stroke: var(--graphite); stroke-width: 1.5; }
   .entry:hover .g-node,
   .entry:hover .g-live { stroke: var(--invert-fg); }
   .entry:hover .g-node.g-idle,
-  .entry:hover .g-dash,
-  .entry:hover .g-strike { stroke: var(--invert-rule); }
+  .entry:hover .g-dash { stroke: var(--invert-rule); }
 
   .w-foot {
     margin-top: clamp(2.5rem, 1.5rem + 3vw, 4rem);

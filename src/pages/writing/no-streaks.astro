@@ -1,0 +1,269 @@
+---
+import Article from '../../layouts/Article.astro'
+---
+
+<Article
+  title="Why my app has no streaks"
+  n="02"
+  date="24 September 2026"
+  read="8 min"
+  system="Quality review · closed metric list · recovery sweeps"
+  standfirst="How I decided what Nura measures, and how I made the numbers it must never watch impossible to add by accident."
+>
+  <div class="prose">
+    <p>
+      Most apps judge themselves by how often you come back. Daily active
+      users, streaks, time in app, the little flame that goes out if you miss a
+      day. Those numbers run whole companies, and for a lot of products they're
+      a fair proxy for value.
+    </p>
+
+    <p>
+      Nura is an app for the night after a fight with your partner. You open it
+      when something happens, go through a guided conversation for about ten
+      minutes, and leave with a card that says what happened and one small
+      thing to try. Then you close it and go to sleep.
+    </p>
+
+    <p>
+      Think about what the usual numbers would mean for that person. Someone
+      who opens Nura every night is having a terrible month. A long session
+      might mean a hard conversation that needed the time, or it might mean the
+      model agreed with everything they said and kept them talking in circles.
+      If I tuned the product to push those numbers up, I'd be rewarding the
+      exact things I built Nura to avoid.
+    </p>
+
+    <p>
+      So early on I wrote down a rule: no streaks, no daily prompts, no "we
+      haven't seen you in a while". People come back when life brings them
+      back. That rule was easy to write. Making the backend hold to it, and
+      deciding what to measure instead, took more thought.
+    </p>
+
+    <h2>What the product does instead</h2>
+    <p>
+      Nura sends exactly one notification. The evening after a session, it asks
+      how the small thing went, in a two-minute check-in with four buttons. The
+      answer gets stamped onto yesterday's card. That's the whole re-engagement
+      system.
+    </p>
+
+    <p>
+      The value is meant to show up in two places. The first is the card,
+      which lands within twenty seconds of the session ending, every time. The
+      second is the Mirror, a screen that opens after a few sessions and shows
+      the pattern someone keeps ending up in, with a quote from them under
+      every step. What someone would lose by leaving is everything Nura has
+      learned about them. That's the retention bet: people stay because it
+      gets more useful, and nothing tries to create a habit.
+    </p>
+
+    <h2>The six numbers</h2>
+    <p>
+      The weekly quality review looks at six numbers, and each one asks
+      whether Nura helped.
+    </p>
+
+    <ol>
+      <li>
+        <strong>Kept rate.</strong> How many cards people chose to keep. A card
+        nobody keeps didn't earn its place.
+      </li>
+      <li>
+        <strong>Flip-through rate.</strong> How many people turned the card
+        over to read Nura's observation on the back. The front is their own
+        story. The back is where Nura says something new, so this is the
+        closest thing I have to "was the read worth reading".
+      </li>
+      <li>
+        <strong>Mirror verdicts.</strong> Every step in the Mirror has three
+        answers: "Yes, that's it", "Partly" and "That's off". If fewer than 60%
+        of answers are yes or partly, the Mirror is telling people things about
+        themselves they don't recognize. The middle answer matters most.
+        Counted as a yes it would flatter the Mirror, and counted as a no it
+        would condemn it.
+      </li>
+      <li>
+        <strong>Abandonment, by how far people got.</strong> When someone walks
+        away from a session, how much ground had it covered? Someone who leaves
+        at the first question and someone who leaves after five things were
+        covered are telling me different stories, so the review keeps the
+        whole list instead of an average that would blur them together.
+      </li>
+      <li>
+        <strong>Card latency.</strong> The time between a session closing and
+        its card existing. The promise is twenty seconds. A card that takes
+        four minutes breaks the promise, however good it is.
+      </li>
+      <li>
+        <strong>Regeneration rate.</strong> How often a line Nura wrote broke
+        one of its own voice rules (a diagnosis word, a cliché, an exclamation
+        mark) and had to be written again while someone waited.
+      </li>
+    </ol>
+
+    <p>
+      And three numbers are written into the code as things the product never
+      tracks: session length, return rate and streaks.
+    </p>
+
+    <h2>A rule in a document is a rule somebody has to remember</h2>
+    <p>
+      I've seen what happens to "we don't track that" in a growing product.
+      Someone adds a metrics library, someone asks for a quick chart of average
+      session length for an investor update, and six months later it's on the
+      team dashboard and people are quietly optimizing it.
+    </p>
+
+    <p>
+      So the list of six is closed in the code. It's a fixed type with exactly
+      those six entries, and a test asserts the list is exactly those six. To
+      add average session length, someone would have to edit that list, in one
+      file, right next to a paragraph explaining why the list is closed, and a
+      test would go red until they updated it too. The decision can still be
+      reversed. It just takes someone making that call on purpose, with their
+      name on the change, which is what I wanted.
+    </p>
+
+    <h2>Two numbers that had no source</h2>
+    <p>
+      When I sat down to build the review, two of the six couldn't be computed
+      at all.
+    </p>
+
+    <p>
+      The flip-through rate had nothing behind it. Both faces of a card are
+      sent to the phone together, on purpose, so the flip animation never
+      waits on the network. That meant the server never learned whether anyone
+      flipped a card. A chart of it would have shown 0% forever, and a chart
+      stuck at zero looks exactly like a chart that works.
+    </p>
+
+    <p>
+      The fix was a small signal the app sends after the animation finishes,
+      which nobody waits on. Where it's stored mattered more. It's a timestamp
+      on the card, and it's written only once. The fortieth time someone opens
+      a card they love, nothing new is recorded. The data can say "the back of
+      this card was read" and nothing more. It can't turn into a record of how
+      often someone sits with their own words at night, and I didn't want that
+      record to exist.
+    </p>
+
+    <p>
+      The regeneration rate had the same problem. The database stored messages
+      and model calls, and nothing that said "this line was written twice". It
+      turned out the model calls already held the answer. Every rejected
+      attempt now leaves a row, and because a line gets at most two attempts,
+      the number of lines and the number of rewrites can be worked out exactly
+      from the calls they left behind. One detail I was careful about: when
+      both attempts fail and the person gets a simpler templated line, that
+      still counts as a line they read. Leaving those out would make the rate
+      look better exactly when the voice checks were failing most.
+    </p>
+
+    <h2>Zero is a claim about the product</h2>
+    <p>
+      A quiet week with no cards has no kept rate. If a dashboard prints that
+      as 0%, it reads as "nobody kept anything", which is a finding about the
+      product and a false one.
+    </p>
+
+    <p>
+      Every number in the review can say "not enough data yet", and a week
+      with nothing in it produces that answer automatically. The card latency
+      check goes a step further and tells an empty day apart from a quiet one,
+      because they need different responses. Nothing at all might mean the
+      pipeline has stopped. A few cards is just a Tuesday.
+    </p>
+
+    <p>
+      Only two numbers are judged against a target: twenty seconds for a card,
+      and 60% for the Mirror. Both came from Nura's written specs. The others
+      are reported plainly for a person to read, because a target that nobody
+      actually decided on, printed next to a real number, gets treated as real
+      by the third person who reads it.
+    </p>
+
+    <h2>Keeping safety out of the numbers</h2>
+    <p>
+      Some sessions end early for the best possible reason. When Nura's safety
+      screen notices someone might be in danger, the conversation stops and
+      crisis resources appear. That session did exactly what it should.
+    </p>
+
+    <p>
+      If those sessions counted as abandonments, safety would be sitting inside
+      a number somebody is trying to bring down. And the week that number is
+      under pressure is the week someone quietly makes the safety screen less
+      sensitive. So safety-routed sessions are excluded from the abandonment
+      count by name, with their own test. The same rule keeps them out of the
+      paywall: a session that ended with crisis resources on screen never
+      counts toward someone's free sessions.
+    </p>
+
+    <h2>The nightly nudge I almost shipped</h2>
+    <p>This is the one that surprised me.</p>
+
+    <p>
+      Nura has background sweeps that notice when a job got lost, for example
+      a check-in notification that never went out because Redis blinked at the
+      wrong moment. The obvious window for the check-in sweep was three days,
+      since that's how long a check-in stays open.
+    </p>
+
+    <p>
+      With that window, the sweep would find the same unanswered check-in
+      every night and send the notification again. The person who didn't
+      answer on the first evening would get a nudge on the second and the
+      third. That's a daily-open incentive, built by accident, out of a
+      reliability feature.
+    </p>
+
+    <p>
+      What actually prevents a duplicate is the job queue, which remembers a
+      finished job for one day. So the sweep's window has to stay inside that
+      day. It's six hours now. The two numbers lived in different files, so
+      they were moved next to each other, and a small function checks that one
+      stays inside the other. If someone widens the window later, a test fails
+      and tells them why.
+    </p>
+
+    <p>
+      I think about this one a lot. Nobody decided to nag people. A sensible
+      engineering default got there on its own.
+    </p>
+
+    <h2>What this costs</h2>
+    <p>
+      I'll be honest about the trade. When someone asks how Nura retains users,
+      I don't have a daily-active chart to show them. The natural rhythm for a
+      couple is probably a few hard evenings a month, and I don't know the real
+      number yet, because nobody outside the team has used Nura. The pricing
+      will eventually have to reflect whatever that rhythm turns out to be, and
+      that's still an open question on my list.
+    </p>
+
+    <p>
+      The review itself has only ever run against test data. The first real
+      signal will come from ten closed testers, and the bar I've set for that
+      is simple: at least seven of them say the card got it right.
+    </p>
+
+    <h2>What I took from it</h2>
+    <p>
+      The numbers a product watches end up deciding what it becomes, usually
+      without anyone meaning them to. Choosing them is a product decision, and
+      it deserves the same care as any screen.
+    </p>
+
+    <p>
+      Writing the forbidden list down felt like enough at first. Putting it in
+      the code, where changing it takes a deliberate edit and a failing test,
+      is what makes it last. And the nightly nudge taught me that the most
+      important place to protect people is inside the plumbing, where an
+      ordinary default can build the exact thing you promised you'd never
+      build.
+    </p>
+  </div>
+</Article>

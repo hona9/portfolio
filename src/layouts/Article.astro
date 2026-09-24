@@ -8,8 +8,9 @@ interface Props {
   system: string
   standfirst: string
   description?: string
+  date?: string
 }
-const { title, n, read, system, standfirst, description } = Astro.props
+const { title, n, read, system, standfirst, description, date } = Astro.props
 ---
 
 <Base title={title} description={description ?? standfirst}>
@@ -19,6 +20,7 @@ const { title, n, read, system, standfirst, description } = Astro.props
       <h1 class="display art__title measure">{title}</h1>
       <p class="art__standfirst measure">{standfirst}</p>
       <div class="art__meta">
+        {date && <span class="label">{date}</span>}
         <span class="label">{read} read</span>
         <span class="label art__sys">{system}</span>
       </div>
@@ -84,6 +86,64 @@ const { title, n, read, system, standfirst, description } = Astro.props
     padding: 1rem 1.2rem;
     line-height: 1.55;
   }
+  /* code blocks reuse the .draft panel treatment above */
+  .art__body :global(.prose pre) {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--ink);
+    background: var(--panel);
+    border: 1px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    line-height: 1.55;
+    overflow-x: auto;
+  }
+  .art__body :global(.prose pre code) { font-family: inherit; }
+  .art__body :global(.prose :not(pre) > code) {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--ink);
+  }
+
+  .art__body :global(.prose ul),
+  .art__body :global(.prose ol) {
+    font-family: var(--font-sans);
+    color: var(--graphite);
+    line-height: 1.7;
+    padding-left: 1.2rem;
+  }
+  .art__body :global(.prose ol) { padding-left: 1.5rem; }
+  .art__body :global(.prose li + li) { margin-top: 0.8rem; }
+
+  /* tables sit in the same bordered panel as code, scrolling on narrow screens */
+  .art__body :global(.prose .table-wrap) {
+    max-width: none;
+    overflow-x: auto;
+    border: 1px solid var(--ink);
+    border-radius: var(--radius);
+  }
+  .art__body :global(.prose table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--graphite);
+    white-space: nowrap;
+  }
+  .art__body :global(.prose th),
+  .art__body :global(.prose td) {
+    padding: 0.7rem 1rem;
+    text-align: left;
+    border-top: 1px solid var(--rule);
+  }
+  .art__body :global(.prose thead th) {
+    border-top: 0;
+    background: var(--panel);
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .art__body :global(.prose tbody th) { color: var(--ink); font-weight: 500; }
+
   /* the embedded diagram breaks out of the reading measure */
   .art__body :global(.prose .breakout) { max-width: none; }
 </style>

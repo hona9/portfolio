@@ -2,8 +2,8 @@
 import Base from '../layouts/Base.astro'
 
 const notes = [
-  { t: "Why I split Nura's background jobs across two queues", href: '/writing/queue-isolation' },
-  { t: 'Rotating refresh tokens, and the day one shows up twice', href: '/writing/token-rotation' },
+  { t: 'The message that has to be noticed', href: '/writing/jev-safety-classifier' },
+  { t: 'Why my app has no streaks', href: '/writing/no-streaks' },
 ]
 ---
 
@@ -69,20 +69,12 @@ const notes = [
     </script>
 
     <p class="hero__lede measure">
-      I'm a backend engineer who thinks about the product and the business it
-      sits inside, not just the code. Background jobs that survive their own
-      failures. Auth that holds up when someone tries to break it, not just
-      when everything goes right. Data that stays consistent when three things
-      happen out of order. That's the layer most of a product's reliability
-      actually comes from, and it's the one I've spent the most time getting
-      right.
-    </p>
-
-    <p class="hero__ai">
-      <span class="label hero__ai-tag">Thesis</span>
-      Plenty of products look impressive in a demo. I build the part that
-      keeps them standing once real users, real load, and the occasional bad
-      actor show up.
+      I'm a backend engineer in Kathmandu, three years into writing Node and
+      TypeScript services. Right now I'm building Nura, a guided space for
+      the night after a fight, as its founder and backend engineer: the model
+      gateway, the safety screen on every message, and the job pipeline
+      behind it. I'm available for remote contract or full-time work, and
+      Kathmandu (UTC+5:45) overlaps a full European workday.
     </p>
 
     <div class="hero__actions">
@@ -100,10 +92,11 @@ const notes = [
       <p class="label band__kicker">01 / selected work</p>
       <h2 class="display band__title">Nura</h2>
       <p class="band__lede measure">
-        An AI journaling app built on background agent jobs. The interesting part
-        is underneath: keeping the background work alive when something fails, and
-        deciding when a session can still be trusted. Both run as live diagrams on
-        the case study.
+        A guided space for the night after a fight, pre-launch. A short
+        conversation ends in a card, and every quote on it is checked against
+        what the person actually wrote. The backend is complete, with 2,599
+        tests and a safety screen that reads every message before anything is
+        shown. The case study goes through the five decisions that shaped it.
       </p>
       <a class="band__cta" href="/work">
         See how I built it <span aria-hidden="true">→</span>
@@ -134,8 +127,8 @@ const notes = [
       <p class="label band__kicker">03 / contact</p>
       <h2 class="display band__title">Let's talk</h2>
       <p class="band__lede measure">
-        If the hard part of what you're building lives in the backend,
-        that's usually a good first conversation.
+        I'm available for remote contract or full-time backend work. Email is
+        the fastest way to reach me.
       </p>
       <a class="band__cta" href="/contact">
         Get in touch <span aria-hidden="true">→</span>

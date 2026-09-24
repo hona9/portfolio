@@ -55,7 +55,7 @@ static HTML.
 ```
 src/
 ├── layouts/        Base.astro (shell), Article.astro (writing posts)
-├── components/     Nav, Footer, QueueIsolationDiagram, TokenRotationDiagram
+├── components/     Nav, Footer, LocalTime
 ├── pages/          index, work, writing, about, contact, writing/*
 └── styles/         tokens.css (design system), diagram.css (diagram chrome)
 ```
